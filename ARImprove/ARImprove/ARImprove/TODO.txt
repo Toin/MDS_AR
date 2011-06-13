@@ -1,0 +1,84 @@
+****************************************************************
+Information about the new solution created with the AddOnInstallerWizard
+****************************************************************
+
+The project with the same name as you gave for the solution is the project 
+who will generate your addon installer executable.
+
+The CustomerLibrary project contains an extension of the Windows Installer project.
+
+The Setup project is an empty Windows Installer project. This setup project
+is automaticaly included into the Installer project.
+
+The only project to modify is the Setup project. 
+The other two projects only need to be recompiled at the end.
+
+
+****************************************************************
+Actions to be completed to create your Installer.exe
+****************************************************************
+
+Please follow this steps to complete the Setup project:
+
+1. Add the .exe file of your addon application and all the files you need to run
+your addon to the FileSystem view.
+(Right click under Setup project, then View -> FileSystem.
+Add each one of the files and directories you need in the corresponding folder.
+Application folder contains the image that will be copied to the installation 
+directory)
+
+The Interop.SAPbouiCOM.DLL or/and Interop.SAPbobsCOM.DLL will be automaticaly 
+added to the Detected Dependencies of your Setup project.
+
+2. Add the CustomerLibrary as project output.
+(Right click under Setup project, then Add -> Project Output and choose 
+CustomerLibrary).
+
+3. Right click on the SAPbouiCOM.exe and SAPbobsCOM.dll dependencies and
+choose Exclude for both of them.
+(a symbol will appear on the left-down corner of each dependency icon).
+
+4. Right click on the dotnetfxredist_x86.msm dependency and click Exclude if 
+it is not already excluded (a symbol will appear on the left-down corner of 
+the dependency icon).
+
+5. Add CustomerLibrary output as Custom Action for all possible custom actions.
+Right click on Setup project then View-> Custom Actions to have access to the 
+custom actions, you will have then all actions custom can modify 
+(Install, Commit, Rollback, Uninstal). Add the CustomerLibrary output (look for it
+inside the Application folder) for all the custom actions.
+
+6. Add a needed parameter into Commit custom action library properties. 
+For that set the CustomActionData property of the Commit action (right click on
+Commit Primary output from CustomerLibrary and then choose Properties Window) to 
+/target="[TARGETDIR]\"
+
+7. Change ProductName, ProductCode, Manufacturer, Author and Title at least into 
+the Setup properties in order to avoid colisions with other AddOns installers 
+created with this wizard.
+
+8. Change Project Dependencies into the Solution properties to build the projects 
+in the order:
+  1. CustomerLibrary
+  2. Setup
+  3. Your project name
+  
+8. Rebuild the entire solution.
+
+****************************************************************
+Actions to be done before installing the addon  
+****************************************************************
+
+Now that you have the Installer.exe file you need to create a .ard file
+needed by Business One to complete the installation.
+
+To create the .ard file you can use the AddOnRegDataGen.bat file located in the 
+directory named AddOnRegDataGenFile inside the main project generated.
+
+You need to launch the AddOnRegDataGen.bat execution every time you recompile 
+your AddOn.exe or the Installer.exe projects.
+
+****************************************************************
+You can find more information about the general installation procedure into the 
+UI API Help document, chapter "Package and Installation".
+****************************************************************
