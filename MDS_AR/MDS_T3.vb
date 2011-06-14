@@ -105,6 +105,63 @@ Public Class MDS_T3
         PdcInputAplicationItem(FormUID, pVal, BubbleEvent)
         PdcTolakAplicationItem(FormUID, pVal, BubbleEvent)
 
+        If pVal.FormTypeEx = "-170" Then
+            If pVal.ItemUID = "U_PDCNo" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_LOST_FOCUS And pVal.ActionSuccess = True Then
+                Dim oFormUdf As SAPbouiCOM.Form = Nothing
+                Dim oFormMain As SAPbouiCOM.Form = Nothing
+                Dim objColumnsPayment As SAPbouiCOM.Columns = Nothing
+                Dim objMatrixPayment As SAPbouiCOM.Matrix = Nothing
+                Dim strsql As String
+                Dim oRecSet As SAPbobsCOM.Recordset = Nothing
+                oRecSet = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
+                oFormUdf = SBO_Application.Forms.Item(FormUID)
+                oFormMain = SBO_Application.Forms.GetForm(170, 1)
+                objMatrixPayment = oFormMain.Items.Item("20").Specific
+                objColumnsPayment = objMatrixPayment.Columns
+
+                If oFormMain.Items.Item("5").Specific.value = "" Then
+                    SBO_Application.SetStatusBarMessage("BP Code Must fill", SAPbouiCOM.BoMessageTime.bmt_Short)
+                    BubbleEvent = False
+                End If
+
+                If oFormUdf.Items.Item("U_PDCBankID").Specific.value = "" Then
+                    SBO_Application.SetStatusBarMessage("Bank Id Must fill", SAPbouiCOM.BoMessageTime.bmt_Short)
+                    BubbleEvent = False
+                End If
+
+                If oFormUdf.Items.Item("U_PDCNo").Specific.value = "" Then
+                    SBO_Application.SetStatusBarMessage("PDC No Must fill", SAPbouiCOM.BoMessageTime.bmt_Short)
+                End If
+
+                If BubbleEvent = True Then
+                    For I = 1 To objMatrixPayment.RowCount
+
+                        strsql = "SELECT T1.U_OINVDocNum,T1.U_CollectAmount,T0.U_CardCode " & _
+                            "FROM [@MIS_PDC] AS T0 RIGHT OUTER JOIN [@MIS_PDCL] AS T1 ON T1.DocEntry = T0.DocEntry " & _
+                            "WHERE T0.U_CardCode='" & oFormMain.Items.Item("5").Specific.value & "' AND " & _
+                            "T0.U_PDCBankID='" & oFormUdf.Items.Item("U_PDCBankID").Specific.value & "' AND " & _
+                            "T0.U_PDCNo='" & oFormUdf.Items.Item("U_PDCNo").Specific.value & "' AND " & _
+                            "T1.U_OINVDocNum='" & objColumnsPayment.Item("1").Cells.Item(I).Specific.value & "'"
+                        oRecSet.DoQuery(strsql)
+
+                        If oRecSet.RecordCount > 0 Then
+                            objColumnsPayment.Item("10000127").Cells.Item(I).Specific.Checked = True
+                            objColumnsPayment.Item("24").Cells.Item(I).Specific.value = oRecSet.Fields.Item("U_CollectAmount").Value
+                        Else
+                            objColumnsPayment.Item("10000127").Cells.Item(I).Specific.Checked = False
+                            objColumnsPayment.Item("24").Cells.Item(I).Specific.value = objColumnsPayment.Item("7").Cells.Item(I).Specific.value
+                        End If
+
+                    Next
+                End If
+               
+                oFormUdf = Nothing
+                oFormMain = Nothing
+                objColumnsPayment = Nothing
+                objMatrixPayment = Nothing
+            End If
+        End If
+
         Select Case FormUID
             Case "DeleteT3"
                 'karno delete T3 Tahap 3 (2011.05.31 11:45:00)
