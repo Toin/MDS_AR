@@ -887,13 +887,20 @@ Public Class MDS_T3
             Exit Sub
         Else
 
-            ARStatusQuery = "SELECT 'N' [AR Generate], T1.U_WilayahCollect [Wilayah], T0.CardCode [Customer Code], T0.CardName [Customer Name], T0.U_ProjectDesc [Project] " & _
-                            ", T0.docentry [Invoice], T0.Docnum [Invoice No], T0.DocDate [Invoice Date], T0.DocDueDate [Due Date], T0.Address [Address] From OINV T0 " & _
+            ARStatusQuery = "SELECT 'N' [AR Generate], T0.Docnum [Invoice No], T0.docentry [Invoice], T0.DocCur [Ccy],  " & _
+                            "CASE WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T0.DocTotal ELSE T0.DocTotalFC END [Invoice Amount], " & _
+                            "CASE WHEN ISNULL(T5.U_DocTotal, 0) <> 0 THEN (T5.U_DocTotal - T5.U_TotUM + T5.U_PPNDPP) " & _
+                            "ELSE " & _
+                            "	CASE WHEN LEFT(T0.CardCode, 2) = 'CP' THEN 0 " & _
+                            "   ELSE T0.DocTotal End " & _
+                            "END [FP Amount], T0.U_ProjectDesc [Project], T0.DocDate [Invoice Date], " & _
+                            "T0.DocDueDate [Due Date], T1.U_WilayahCollect [Wilayah], T0.CardCode [Customer Code], T0.CardName [Customer Name], T0.Address [Address] From OINV T0 " & _
                             "INNER JOIN OCRD T1 ON T0.CardCode = T1.CardCode INNER JOIN OCTG T4 ON T0.GroupNum = T4.GroupNum " & _
+                            "JOIN [@MIS_TAX] T5 ON T5.U_OINVDcNm = T0.DocNum " & _
                             "WHERE T0.DocStatus <> 'C' AND (T0.DocDate >= '" & oForm.Items.Item("DateFrom").Specific.value & "' AND T0.DocDate <= '" & oForm.Items.Item("DateTo").Specific.Value & "') " & _
                             "AND T0.CardCode Like '%" & oForm.Items.Item("Customer").Specific.Value & "%' " & _
                             "AND T0.DocEntry NOT IN (SELECT T3.U_OINVDocEntry From [@MIS_T3] T2 " & _
-                            "INNER JOIN [@MIS_T3L] T3 ON T2.DocEntry = T3.DocEntry WHERE T3.U_T3LineStatus <> 'D' ) AND T4.ExtraDays > 0 ORDER BY T1.U_WilayahCollect, T0.CardCode"
+                            "INNER JOIN [@MIS_T3L] T3 ON T2.DocEntry = T3.DocEntry WHERE T3.U_T3LineStatus <> 'D' ) AND T4.ExtraDays > 0 ORDER BY T1.U_WilayahCollect, T0.CardCode, T0.DocNum "
 
 
         End If
@@ -903,6 +910,22 @@ Public Class MDS_T3
         oGenerateT3StatusGrid.Columns.Item("AR Generate").Type = SAPbouiCOM.BoGridColumnType.gct_CheckBox
         oGenerateT3StatusGrid.Columns.Item("AR Generate").TitleObject.Sortable = True
 
+
+        oColumn = oGenerateT3StatusGrid.Columns.Item("Invoice No")
+        oGenerateT3StatusGrid.Columns.Item("Invoice No").TitleObject.Sortable = True
+        oColumn.Editable = False
+
+        oColumn = oGenerateT3StatusGrid.Columns.Item("Ccy")
+        oGenerateT3StatusGrid.Columns.Item("Ccy").TitleObject.Sortable = True
+        oColumn.Editable = False
+
+        oColumn = oGenerateT3StatusGrid.Columns.Item("Invoice Amount")
+        oGenerateT3StatusGrid.Columns.Item("Invoice Amount").TitleObject.Sortable = True
+        oColumn.Editable = False
+
+        oColumn = oGenerateT3StatusGrid.Columns.Item("FP Amount")
+        oGenerateT3StatusGrid.Columns.Item("FP Amount").TitleObject.Sortable = True
+        oColumn.Editable = False
 
         oColumn = oGenerateT3StatusGrid.Columns.Item("Wilayah")
         oGenerateT3StatusGrid.Columns.Item("Wilayah").TitleObject.Sortable = True
@@ -924,10 +947,6 @@ Public Class MDS_T3
         oColumn = oGenerateT3StatusGrid.Columns.Item("Invoice")
         oColumn.LinkedObjectType = SAPbouiCOM.BoLinkedObject.lf_Invoice
         oGenerateT3StatusGrid.Columns.Item("Invoice").TitleObject.Sortable = True
-        oColumn.Editable = False
-
-        oColumn = oGenerateT3StatusGrid.Columns.Item("Invoice No")
-        oGenerateT3StatusGrid.Columns.Item("Invoice No").TitleObject.Sortable = True
         oColumn.Editable = False
 
         oColumn = oGenerateT3StatusGrid.Columns.Item("Invoice Date")
@@ -1252,62 +1271,122 @@ errHandler:
                         End If
                         Dim oRS As SAPbobsCOM.Recordset
                         oRS = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
-                        strQry = "SELECT T0.CardCode AS CustomerCode, T0.CardName AS CustomerName, T1.U_WilayahCollect AS Wilayah, T0.DocEntry AS Invoice, T0.DocCur AS Currency, T0.U_ProjectDesc AS Project, T0.DocRate AS Rate, " & _
-                                " T0.DocNum AS InvoiceNo, T0.DocDate AS InvoiceDate, T0.DocDueDate AS DueDate, T0.DocTotal - T0.VatSum AS NetAmount, " & _
-                                " T0.VatSum AS VatSum, T0.DocTotal AS DocTotal, ISNULL(T2.U_TaxDcDt,'') AS TaxDate, Convert(Varchar(19),T2.U_TaxNum) AS NomorPajak " & _
-                                " FROM OINV T0 INNER JOIN OCRD T1 ON T0.CardCode = T1.CardCode LEFT JOIN [@MIS_TAX] T2 ON T0.DocEntry = T2.U_OinvDcEn " & _
-                                " WHERE T0.DocEntry = '" & oGenerateT3StatusGrid.DataTable.GetValue(("Invoice"), oGenerateT3StatusGrid.GetDataTableRowIndex(idx).ToString) & "'"
+                        'strQry = "SELECT T0.CardCode AS CustomerCode, T0.CardName AS CustomerName, T1.U_WilayahCollect AS Wilayah, T0.DocEntry AS Invoice, T0.DocCur AS Currency, T0.U_ProjectDesc AS Project, T0.DocRate AS Rate, " & _
+                        '        " T0.DocNum AS InvoiceNo, T0.DocDate AS InvoiceDate, T0.DocDueDate AS DueDate, T0.DocTotal - T0.VatSum AS NetAmount, " & _
+                        '        " T0.VatSum AS VatSum, T0.DocTotal AS DocTotal, ISNULL(T2.U_TaxDcDt,'') AS TaxDate, Convert(Varchar(19),T2.U_TaxNum) AS NomorPajak " & _
+                        '        " FROM OINV T0 INNER JOIN OCRD T1 ON T0.CardCode = T1.CardCode LEFT JOIN [@MIS_TAX] T2 ON T0.DocEntry = T2.U_OinvDcEn " & _
+                        '        " WHERE T0.DocEntry = '" & oGenerateT3StatusGrid.DataTable.GetValue(("Invoice"), oGenerateT3StatusGrid.GetDataTableRowIndex(idx).ToString) & "'"
 
-                        oRS.DoQuery(strQry)
+                        If oGenerateT3StatusGrid.DataTable.GetValue(("FP Amount"), oGenerateT3StatusGrid.GetDataTableRowIndex(idx).ToString) = 0 Then
+                            SBO_Application.MessageBox("Invoice#: " & oGenerateT3StatusGrid.DataTable.GetValue(("Invoice No"), oGenerateT3StatusGrid.GetDataTableRowIndex(idx).ToString) & " Amount = 0, tidak boleh digenerate!")
 
-                        Dim NomorPajak As String
-                        Dim CustomerCode As String
-                        NomorPajak = oRS.Fields.Item("NomorPajak").Value
-                        CustomerCode = oRS.Fields.Item("CustomerCode").Value
-
-                        oGeneralData.SetProperty("U_DocDate", Format(CDate(oForm.Items.Item("T3Date").Specific.string), "yyyy/MM/dd"))
-
-                        'oGeneralData.GetProperty(CustomerCode)
-                        oGeneralData.SetProperty("U_KWIDocEntry", oNextnumber)
-                        oGeneralData.SetProperty("U_CardCode", CustomerCode)
-                        oGeneralData.SetProperty("U_CardName", oRS.Fields.Item("CustomerName").Value)
-                        oGeneralData.SetProperty("U_WilayahCollect", oRS.Fields.Item("Wilayah").Value)
-                        oGeneralData.SetProperty("U_T3Status", "A")
-
-                        oGeneralDataChild = oGeneralData.Child("MIS_T3L")
-                        oChild = oGeneralDataChild.Add
-                        oChild.SetProperty("U_OINVDocEntry", oRS.Fields.Item("Invoice").Value)
-                        oChild.SetProperty("U_OINVDocNum", oRS.Fields.Item("InvoiceNo").Value)
-                        oChild.SetProperty("U_OINVDocCur", oRS.Fields.Item("Currency").Value)
-                        oChild.SetProperty("U_OINVDocRate", oRS.Fields.Item("Rate").Value)
-                        oChild.SetProperty("U_OINVProject", oRS.Fields.Item("Project").Value)
-                        oChild.SetProperty("U_OINVDocDate", oRS.Fields.Item("InvoiceDate").Value)
-                        oChild.SetProperty("U_OINVDocDueDate", oRS.Fields.Item("DueDate").Value)
-                        oChild.SetProperty("U_TAXDueDate", oRS.Fields.Item("TaxDate").Value)
-                        oChild.SetProperty("U_TAXTaxNum", NomorPajak)
-                        oChild.SetProperty("U_OINVNetAmount", oRS.Fields.Item("NetAmount").Value)
-                        oChild.SetProperty("U_OINVVATSum", oRS.Fields.Item("VatSum").Value)
-                        oChild.SetProperty("U_OINVDocTotal", oRS.Fields.Item("DocTotal").Value)
-                        oChild.SetProperty("U_T3LineStatus", "A")
-
-                        'End If
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(oRS)
-                        oRS = Nothing
-
-                        If lRetCode <> 0 Then
-                            oCompany.GetLastError(lErrCode, sErrMsg)
-                            SBO_Application.MessageBox(lErrCode & ": " & sErrMsg)
-
-                            If oCompany.InTransaction Then
-                                oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack)
-                            End If
                         Else
+                            strQry = "SELECT T0.CardCode AS CustomerCode, T0.CardName AS CustomerName, T1.U_WilayahCollect AS Wilayah, T0.DocEntry AS Invoice, T0.DocCur AS Currency, T0.U_ProjectDesc AS Project, T0.DocRate AS Rate, " & _
+                                    " T0.DocNum AS InvoiceNo, T0.DocDate AS InvoiceDate, T0.DocDueDate AS DueDate, " & _
+                                    " CASE" & _
+                                    " WHEN ISNULL(T2.U_DocTotal, 0) <> 0 THEN " & _
+                                    "   T2.U_DocTotal - T2.U_TotUM + T2.U_PPNDPP " & _
+                                    " Else " & _
+                                    "   CASE " & _
+                                    "   WHEN LEFT(T0.CardCode, 2) = 'CP' THEN " & _
+                                    "       ROUND(	" & _
+                                    "           CASE " & _
+                                    "           WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN " & _
+                                    "               CASE " & _
+                                    "               WHEN LEFT(T0.CardCode, 2) = 'CP' THEN " & _
+                                    "                   (T0.DocTotal - T0.VatSum) " & _
+                                    "               ELSE (T0.DocTotal - T0.VatSum) " & _
+                                    "               End " & _
+                                    "           Else " & _
+                                    "               (T0.DocTotalFC - T0.VatSumFC) " & _
+                                    "           END " & _
+                                    "           + " & _
+                                    "           CASE " & _
+                                    "           WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  " & _
+                                    "               CASE " & _
+                                    "               WHEN T1.U_isPungut = 'PUNGUT' THEN " & _
+                                    "                   (T0.VatSum) " & _
+                                    "               Else " & _
+                                    "                   0 " & _
+                                    "               End " & _
+                                    "           Else " & _
+                                    "               CASE " & _
+                                    "               WHEN T1.U_isPungut = 'PUNGUT' THEN " & _
+                                    "                   (T0.VatSumFC) " & _
+                                    "               Else " & _
+                                    "                   0 " & _
+                                    "               End " & _
+                                    "           END " & _
+                                    "           , " & _
+                                    "           CASE " & _
+                                    "           WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN 0 " & _
+                                    "           ELSE 3 " & _
+                                    "           END) " & _
+                                    "   ELSE " & _
+                                    "   	CASE " & _
+                                    "       WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN " & _
+                                    "           T0.DocTotal " & _
+                                    "       Else " & _
+                                    "           T0.DocTotalFC " & _
+                                    "       END " & _
+                                    "   End " & _
+                                    "END t3_from_fp_or_inv, " & _
+                                    " T0.DocTotal - T0.VatSum AS NetAmount, " & _
+                                    " T0.VatSum AS VatSum, T0.DocTotal AS DocTotal, ISNULL(T2.U_TaxDcDt,'') AS TaxDate, Convert(Varchar(19),T2.U_TaxNum) AS NomorPajak " & _
+                                    " FROM OINV T0 INNER JOIN OCRD T1 ON T0.CardCode = T1.CardCode LEFT JOIN [@MIS_TAX] T2 ON T0.DocEntry = T2.U_OinvDcEn " & _
+                                    " WHERE T0.DocEntry = '" & oGenerateT3StatusGrid.DataTable.GetValue(("Invoice"), oGenerateT3StatusGrid.GetDataTableRowIndex(idx).ToString) & "'"
 
-                            If oCompany.InTransaction Then
-                                oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit)
+                            oRS.DoQuery(strQry)
+
+                            Dim NomorPajak As String
+                            Dim CustomerCode As String
+                            NomorPajak = oRS.Fields.Item("NomorPajak").Value
+                            CustomerCode = oRS.Fields.Item("CustomerCode").Value
+
+                            oGeneralData.SetProperty("U_DocDate", Format(CDate(oForm.Items.Item("T3Date").Specific.string), "yyyy/MM/dd"))
+
+                            'oGeneralData.GetProperty(CustomerCode)
+                            oGeneralData.SetProperty("U_KWIDocEntry", oNextnumber)
+                            oGeneralData.SetProperty("U_CardCode", CustomerCode)
+                            oGeneralData.SetProperty("U_CardName", oRS.Fields.Item("CustomerName").Value)
+                            oGeneralData.SetProperty("U_WilayahCollect", oRS.Fields.Item("Wilayah").Value)
+                            oGeneralData.SetProperty("U_T3Status", "A")
+
+                            oGeneralDataChild = oGeneralData.Child("MIS_T3L")
+                            oChild = oGeneralDataChild.Add
+                            oChild.SetProperty("U_OINVDocEntry", oRS.Fields.Item("Invoice").Value)
+                            oChild.SetProperty("U_OINVDocNum", oRS.Fields.Item("InvoiceNo").Value)
+                            oChild.SetProperty("U_OINVDocCur", oRS.Fields.Item("Currency").Value)
+                            oChild.SetProperty("U_OINVDocRate", oRS.Fields.Item("Rate").Value)
+                            oChild.SetProperty("U_OINVProject", oRS.Fields.Item("Project").Value)
+                            oChild.SetProperty("U_OINVDocDate", oRS.Fields.Item("InvoiceDate").Value)
+                            oChild.SetProperty("U_OINVDocDueDate", oRS.Fields.Item("DueDate").Value)
+                            oChild.SetProperty("U_TAXDueDate", oRS.Fields.Item("TaxDate").Value)
+                            oChild.SetProperty("U_TAXTaxNum", NomorPajak)
+                            oChild.SetProperty("U_OINVNetAmount", oRS.Fields.Item("NetAmount").Value)
+                            oChild.SetProperty("U_OINVVATSum", oRS.Fields.Item("VatSum").Value)
+                            'oChild.SetProperty("U_OINVDocTotal", oRS.Fields.Item("DocTotal").Value)
+                            oChild.SetProperty("U_OINVDocTotal", oRS.Fields.Item("t3_from_fp_or_inv").Value)
+                            oChild.SetProperty("U_T3LineStatus", "A")
+
+                            'End If
+                            System.Runtime.InteropServices.Marshal.ReleaseComObject(oRS)
+                            oRS = Nothing
+
+                            If lRetCode <> 0 Then
+                                oCompany.GetLastError(lErrCode, sErrMsg)
+                                SBO_Application.MessageBox(lErrCode & ": " & sErrMsg)
+
+                                If oCompany.InTransaction Then
+                                    oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack)
+                                End If
+                            Else
+
+                                If oCompany.InTransaction Then
+                                    oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit)
+                                End If
                             End If
                         End If
-
                     End If
 
                 Next
