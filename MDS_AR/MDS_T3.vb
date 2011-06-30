@@ -896,7 +896,7 @@ Public Class MDS_T3
                             "END [FP Amount], T0.U_ProjectDesc [Project], T0.DocDate [Invoice Date], " & _
                             "T0.DocDueDate [Due Date], T1.U_WilayahCollect [Wilayah], T0.CardCode [Customer Code], T0.CardName [Customer Name], T0.Address [Address] From OINV T0 " & _
                             "INNER JOIN OCRD T1 ON T0.CardCode = T1.CardCode INNER JOIN OCTG T4 ON T0.GroupNum = T4.GroupNum " & _
-                            "JOIN [@MIS_TAX] T5 ON T5.U_OINVDcNm = T0.DocNum " & _
+                            "LEFT JOIN [@MIS_TAX] T5 ON T5.U_OINVDcNm = T0.DocNum " & _
                             "WHERE T0.DocStatus <> 'C' AND (T0.DocDate >= '" & oForm.Items.Item("DateFrom").Specific.value & "' AND T0.DocDate <= '" & oForm.Items.Item("DateTo").Specific.Value & "') " & _
                             "AND T0.CardCode Like '%" & oForm.Items.Item("Customer").Specific.Value & "%' " & _
                             "AND T0.DocEntry NOT IN (SELECT T3.U_OINVDocEntry From [@MIS_T3] T2 " & _

@@ -22,12 +22,18 @@
         "Entry"
         {
         "MsmKey" = "8:_1BEDC6662AD12685D31B8AB8C0624F1F"
-        "OwnerKey" = "8:_5CA10E51A4C3421D84B0D8211E37B996"
+        "OwnerKey" = "8:_F1AC7526ABB34BC09E40AE7FDC6A234E"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_2617B6011BDC48DF80FEF65D03ED8EC2"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_341200452AA54524A0976A2B188A2FB0"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -40,12 +46,6 @@
         "Entry"
         {
         "MsmKey" = "8:_4B52E2468FB543D99BE4F0F61F554925"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_5CA10E51A4C3421D84B0D8211E37B996"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -75,12 +75,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_935D78E62459468D8B1A4242174A4CAF"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_A2C71658082841BBA80EE4B6D10D99C1"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -93,44 +87,50 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_CCBEED3F2A924318B5651EA1FAE576C3"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_F1AC7526ABB34BC09E40AE7FDC6A234E"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_F6765A403508AF215ECFD992842A97B8"
         "OwnerKey" = "8:_1BEDC6662AD12685D31B8AB8C0624F1F"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_F828ACDAAE624E19AECB9DCA92313FB3"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_F8A705D93331C1F78E0817B98A18572F"
-        "OwnerKey" = "8:_5CA10E51A4C3421D84B0D8211E37B996"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_5CA10E51A4C3421D84B0D8211E37B996"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_F828ACDAAE624E19AECB9DCA92313FB3"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_F8A705D93331C1F78E0817B98A18572F"
+        "OwnerKey" = "8:_F1AC7526ABB34BC09E40AE7FDC6A234E"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_1BEDC6662AD12685D31B8AB8C0624F1F"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_341200452AA54524A0976A2B188A2FB0"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_F1AC7526ABB34BC09E40AE7FDC6A234E"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_F8A705D93331C1F78E0817B98A18572F"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -195,59 +195,59 @@
     {
         "CustomAction"
         {
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_8608882A45614A40ABB2396008929AE8"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_3B7150422E0E4EC9986B3BC79D85B564"
             {
             "Name" = "8:Primary output from CustomerLibrary (Active)"
             "Condition" = "8:"
-            "Object" = "8:_F828ACDAAE624E19AECB9DCA92313FB3"
+            "Object" = "8:_341200452AA54524A0976A2B188A2FB0"
             "FileType" = "3:1"
             "InstallAction" = "3:3"
             "Arguments" = "8:"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
-            "Identifier" = "8:_3B7A90E5_7E5D_4DEE_8B9A_39C4A012F9A7"
+            "Identifier" = "8:_2D80EB0A_4A1B_41BB_9FD1_8203AE0D1966"
             "InstallerClass" = "11:TRUE"
             "CustomActionData" = "8:"
             }
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_8C75B4499D1F4618A59C81F7D5AE77D6"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_54E63EA688A64E83A1EA80E120A08280"
             {
             "Name" = "8:Primary output from CustomerLibrary (Active)"
             "Condition" = "8:"
-            "Object" = "8:_F828ACDAAE624E19AECB9DCA92313FB3"
+            "Object" = "8:_341200452AA54524A0976A2B188A2FB0"
             "FileType" = "3:1"
             "InstallAction" = "3:2"
             "Arguments" = "8:"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
-            "Identifier" = "8:_FDD6A963_695A_43A1_A925_D6EF3FA1D3AB"
+            "Identifier" = "8:_360B20FC_7BC5_475A_AC53_FE0AA9D5E339"
             "InstallerClass" = "11:TRUE"
             "CustomActionData" = "8:/target=\"[TARGETDIR]\\\""
             }
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_D4B55544C76442A48B9CFA6C88187A69"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_61575E4F50744CDCB3EE43ACD0A71637"
             {
             "Name" = "8:Primary output from CustomerLibrary (Active)"
             "Condition" = "8:"
-            "Object" = "8:_F828ACDAAE624E19AECB9DCA92313FB3"
+            "Object" = "8:_341200452AA54524A0976A2B188A2FB0"
             "FileType" = "3:1"
             "InstallAction" = "3:1"
             "Arguments" = "8:"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
-            "Identifier" = "8:_D8583FF0_AB1E_4542_B27D_EC4B32C933AD"
+            "Identifier" = "8:_AAE692A7_6A16_4688_A047_22C65CF0F07D"
             "InstallerClass" = "11:TRUE"
             "CustomActionData" = "8:"
             }
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_FDCFD14D46C049C69F5913853708B44A"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_ADAB7D2436DA4047917DA9F9D6B1C157"
             {
             "Name" = "8:Primary output from CustomerLibrary (Active)"
             "Condition" = "8:"
-            "Object" = "8:_F828ACDAAE624E19AECB9DCA92313FB3"
+            "Object" = "8:_341200452AA54524A0976A2B188A2FB0"
             "FileType" = "3:1"
             "InstallAction" = "3:4"
             "Arguments" = "8:"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
-            "Identifier" = "8:_75CB46E0_8546_4DEE_9908_977239341839"
+            "Identifier" = "8:_47AA0E9B_83D8_40CF_B3A0_A30B8C11B879"
             "InstallerClass" = "11:TRUE"
             "CustomActionData" = "8:"
             }
@@ -385,37 +385,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_5CA10E51A4C3421D84B0D8211E37B996"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:MDS_AR, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86"
-                "ScatterAssemblies"
-                {
-                    "_5CA10E51A4C3421D84B0D8211E37B996"
-                    {
-                    "Name" = "8:MDS_AR.exe"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:..\\..\\..\\MDS_AR\\bin\\MDS_AR.exe"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_FE4FC0B8608D48639C0786C2CC82D7D5"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5DC7512A86A21ED08792F0046BBC6BA7"
             {
             "SourcePath" = "8:SAPbouiCOM.exe"
@@ -496,26 +465,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_935D78E62459468D8B1A4242174A4CAF"
-            {
-            "SourcePath" = "8:..\\..\\..\\MDS_AR\\bin\\MDS_AR.xml"
-            "TargetName" = "8:MDS_AR.xml"
-            "Tag" = "8:"
-            "Folder" = "8:_FE4FC0B8608D48639C0786C2CC82D7D5"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A2C71658082841BBA80EE4B6D10D99C1"
             {
             "SourcePath" = "8:..\\..\\..\\MDS_AR\\bin\\MDSLogo.png"
@@ -540,6 +489,57 @@
             {
             "SourcePath" = "8:..\\..\\..\\MDS_AR\\bin\\DeleteT3.srf"
             "TargetName" = "8:DeleteT3.srf"
+            "Tag" = "8:"
+            "Folder" = "8:_FE4FC0B8608D48639C0786C2CC82D7D5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CCBEED3F2A924318B5651EA1FAE576C3"
+            {
+            "SourcePath" = "8:..\\..\\..\\MDS_AR\\bin\\MDS_AR.xml"
+            "TargetName" = "8:MDS_AR.xml"
+            "Tag" = "8:"
+            "Folder" = "8:_FE4FC0B8608D48639C0786C2CC82D7D5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_F1AC7526ABB34BC09E40AE7FDC6A234E"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:MDS_AR, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86"
+                "ScatterAssemblies"
+                {
+                    "_F1AC7526ABB34BC09E40AE7FDC6A234E"
+                    {
+                    "Name" = "8:MDS_AR.exe"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:..\\..\\..\\MDS_AR\\bin\\MDS_AR.exe"
+            "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_FE4FC0B8608D48639C0786C2CC82D7D5"
             "Condition" = "8:"
@@ -663,14 +663,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:AR Improve"
-        "ProductCode" = "8:{5E89DBB8-12C7-47DA-9491-BD3A20A7E778}"
-        "PackageCode" = "8:{495C142C-C446-415C-AE19-104674C8C5CC}"
-        "UpgradeCode" = "8:{96B26795-A215-418D-B468-27C236FC3DD2}"
+        "ProductCode" = "8:{C09C589E-9C63-4B69-A2D5-B29731BF3757}"
+        "PackageCode" = "8:{53851A0B-D245-4661-9E6E-6D74DCF80CBB}"
+        "UpgradeCode" = "8:{4F84762B-4883-4A50-AE91-4FC2273496F6}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:0.0.6"
+        "ProductVersion" = "8:0.0.7"
         "Manufacturer" = "8:Mitra Inti Solusindo"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -1182,7 +1182,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_F828ACDAAE624E19AECB9DCA92313FB3"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_341200452AA54524A0976A2B188A2FB0"
             {
             "SourcePath" = "8:..\\CustomerLibrary\\obj\\x86\\Release\\CustomerLibTemplate.dll"
             "TargetName" = "8:"
