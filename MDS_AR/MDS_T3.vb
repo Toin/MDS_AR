@@ -356,6 +356,11 @@ Public Class MDS_T3
 
         StrSql = "SELECT T0.U_CardCode, T0.U_CardName, T0.U_DocDate, T0.U_CollectID, T1.U_CollectorName FROM [@MIS_T3] T0" & _
                 " LEFT JOIN [@COLLECTOR] T1 ON T0.U_CollectID = T1.U_CollectorID WHERE T0.DocNum = '" & oForm.Items.Item("T3Number").Specific.Value & "' "
+        'StrSql = "SELECT T0.U_CardCode, T0.U_CardName, T0.U_DocDate, T0.U_CollectID, T2.U_CollectorName, SUM(T1.U_OINVDocTotal) [T3 Amount]" & _
+        '        " FROM [@MIS_T3] T0" & _
+        '        " LEFT JOIN [@MIS_T3L] T1 ON T1.DocEntry = T0.DocEntry " & _
+        '        " LEFT JOIN [@COLLECTOR] T2 ON T0.U_CollectID = T2.U_CollectorID WHERE T0.DocNum = '" & oForm.Items.Item("T3Number").Specific.Value & "' " & _
+        '        " GROUP BY T0.U_CardCode, T0.U_CardName, T0.U_DocDate, T0.U_CollectID, T2.U_CollectorName "
         oRecSet.DoQuery(StrSql)
 
         If oRecSet.RecordCount = 0 Then
@@ -818,12 +823,22 @@ Public Class MDS_T3
             Exit Sub
         Else
 
-            InputT3StatusQuery = "SELECT Distinct 'Y' AS [Receipt T3], T0.U_DocDate AS T3Date, T0.U_WilayahCollect AS Wilayah, T0.DocNum AS T3No, T0.U_CardCode AS CustomerCode, T0.U_CardName AS CustomerName FROM [@MIS_T3] T0 " & _
-                            "INNER JOIN [@MIS_T3L] T1 " & _
-                            "ON T0.DocEntry = T1.DocEntry " & _
-                            "WHERE T0.U_DocDate = '" & oForm.Items.Item("T3Date").Specific.value & "' " & _
-                            "AND T0.U_WilayahCollect LIKE '%" & oForm.Items.Item("Region").Specific.value & "%' AND T1.U_T3LineStatus <> 'R' AND T1.U_T3LineStatus = 'A'  " & _
-                            "ORDER BY T0.U_DocDate, T0.U_WilayahCollect"
+            'InputT3StatusQuery = "SELECT Distinct 'Y' AS [Receipt T3], T0.U_DocDate AS T3Date, T0.U_WilayahCollect AS Wilayah, T0.DocNum AS T3No, T0.U_CardCode AS CustomerCode, T0.U_CardName AS CustomerName FROM [@MIS_T3] T0 " & _
+            '                "INNER JOIN [@MIS_T3L] T1 " & _
+            '                "ON T0.DocEntry = T1.DocEntry " & _
+            '                "WHERE T0.U_DocDate = '" & oForm.Items.Item("T3Date").Specific.value & "' " & _
+            '                "AND T0.U_WilayahCollect LIKE '%" & oForm.Items.Item("Region").Specific.value & "%' AND T1.U_T3LineStatus <> 'R' AND T1.U_T3LineStatus = 'A'  " & _
+            '                "ORDER BY T0.U_DocDate, T0.U_WilayahCollect"
+            InputT3StatusQuery = "SELECT 'Y' AS [Receipt T3], T0.U_DocDate AS T3Date, T0.U_WilayahCollect AS Wilayah, " & _
+                            " T0.DocNum AS T3No, SUM(T1.U_OINVDocTotal) [T3 Amount]," & _
+                            " T0.U_CardCode AS CustomerCode, T0.U_CardName AS CustomerName " & _
+                            " FROM [@MIS_T3] T0 " & _
+                            " INNER JOIN [@MIS_T3L] T1 " & _
+                            " ON T0.DocEntry = T1.DocEntry " & _
+                            " WHERE T0.U_DocDate = '" & oForm.Items.Item("T3Date").Specific.value & "' " & _
+                            " AND ISNULL(T0.U_WilayahCollect, '') LIKE '%" & oForm.Items.Item("Region").Specific.value & "%' AND T1.U_T3LineStatus <> 'R' AND T1.U_T3LineStatus = 'A'  " & _
+                            " GROUP BY T0.U_DocDate, T0.U_WilayahCollect, T0.DocNum, T0.U_CardCode, T0.U_CardName " & _
+                            " ORDER BY T0.U_DocDate, T0.U_WilayahCollect"
 
         End If
         oForm.DataSources.DataTables.Item("InT3StatusLst").ExecuteQuery(InputT3StatusQuery)
@@ -842,6 +857,10 @@ Public Class MDS_T3
 
         oColumn = oInputT3StatusGrid.Columns.Item("T3No")
         oInputT3StatusGrid.Columns.Item("T3No").TitleObject.Sortable = True
+        oColumn.Editable = False
+
+        oColumn = oInputT3StatusGrid.Columns.Item("T3 Amount")
+        oInputT3StatusGrid.Columns.Item("T3 Amount").TitleObject.Sortable = True
         oColumn.Editable = False
 
         oColumn = oInputT3StatusGrid.Columns.Item("CustomerCode")
