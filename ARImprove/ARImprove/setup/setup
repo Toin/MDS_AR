@@ -22,12 +22,18 @@
         "Entry"
         {
         "MsmKey" = "8:_1BEDC6662AD12685D31B8AB8C0624F1F"
-        "OwnerKey" = "8:_A4ADFA9F9DF94EF095109FD9E7601180"
+        "OwnerKey" = "8:_2EE0F507C123443A81D70FE708C8802C"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_2617B6011BDC48DF80FEF65D03ED8EC2"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_2EE0F507C123443A81D70FE708C8802C"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -81,12 +87,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_A4ADFA9F9DF94EF095109FD9E7601180"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_C4D5C2AE1CBD43ACADCA13737C14CF9C"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -106,7 +106,7 @@
         "Entry"
         {
         "MsmKey" = "8:_F8A705D93331C1F78E0817B98A18572F"
-        "OwnerKey" = "8:_A4ADFA9F9DF94EF095109FD9E7601180"
+        "OwnerKey" = "8:_2EE0F507C123443A81D70FE708C8802C"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -118,7 +118,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A4ADFA9F9DF94EF095109FD9E7601180"
+        "OwnerKey" = "8:_2EE0F507C123443A81D70FE708C8802C"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -345,6 +345,37 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_2EE0F507C123443A81D70FE708C8802C"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:MDS_AR, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86"
+                "ScatterAssemblies"
+                {
+                    "_2EE0F507C123443A81D70FE708C8802C"
+                    {
+                    "Name" = "8:MDS_AR.exe"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:..\\..\\..\\MDS_AR\\bin\\MDS_AR.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_FE4FC0B8608D48639C0786C2CC82D7D5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_44EE907AC11146C9BFB3C4708D5349E3"
             {
             "SourcePath" = "8:..\\..\\..\\MDS_AR\\bin\\GenerateT3.srf"
@@ -469,37 +500,6 @@
             {
             "SourcePath" = "8:..\\..\\..\\MDS_AR\\bin\\MDSLogo.png"
             "TargetName" = "8:MDSLogo.png"
-            "Tag" = "8:"
-            "Folder" = "8:_FE4FC0B8608D48639C0786C2CC82D7D5"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_A4ADFA9F9DF94EF095109FD9E7601180"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:MDS_AR, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86"
-                "ScatterAssemblies"
-                {
-                    "_A4ADFA9F9DF94EF095109FD9E7601180"
-                    {
-                    "Name" = "8:MDS_AR.exe"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:..\\..\\..\\MDS_AR\\bin\\MDS_AR.exe"
-            "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_FE4FC0B8608D48639C0786C2CC82D7D5"
             "Condition" = "8:"
@@ -663,14 +663,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:AR Improve"
-        "ProductCode" = "8:{233F9835-23E2-4A25-BA45-A11F1C9DA4CE}"
-        "PackageCode" = "8:{9F73CBAE-8A95-4BF5-A9EC-EDF7DCEA29AA}"
-        "UpgradeCode" = "8:{8553802C-CE5D-42A5-B5F8-C4E807003C30}"
+        "ProductCode" = "8:{CA6C9C94-5354-4CCB-A6CA-6BF010A15941}"
+        "PackageCode" = "8:{2C5467EF-5C7E-4A5C-B8CF-6F8EAA7E4088}"
+        "UpgradeCode" = "8:{3078C238-AC0B-4A0C-8B43-9821A65B8D7B}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:0.0.8"
+        "ProductVersion" = "8:0.0.9"
         "Manufacturer" = "8:Mitra Inti Solusindo"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

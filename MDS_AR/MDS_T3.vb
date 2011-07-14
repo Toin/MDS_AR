@@ -906,9 +906,39 @@ Public Class MDS_T3
             Exit Sub
         Else
 
+            'ARStatusQuery = "SELECT 'N' [AR Generate], T0.Docnum [Invoice No], T0.docentry [Invoice], T0.DocCur [Ccy],  " & _
+            '                "CASE WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T0.DocTotal ELSE T0.DocTotalFC END [Invoice Amount], " & _
+            '                "CASE WHEN ISNULL(T5.U_DocTotal, 0) <> 0 THEN (T5.U_DocTotal - T5.U_TotUM + T5.U_PPNDPP) " & _
+            '                "ELSE " & _
+            '                "	CASE WHEN LEFT(T0.CardCode, 2) = 'CP' THEN 0 " & _
+            '                "   ELSE T0.DocTotal End " & _
+            '                "END [FP Amount], T0.U_ProjectDesc [Project], T0.DocDate [Invoice Date], " & _
+            '                "T0.DocDueDate [Due Date], T1.U_WilayahCollect [Wilayah], T0.CardCode [Customer Code], T0.CardName [Customer Name], T0.Address [Address] From OINV T0 " & _
+            '                "INNER JOIN OCRD T1 ON T0.CardCode = T1.CardCode INNER JOIN OCTG T4 ON T0.GroupNum = T4.GroupNum " & _
+            '                "LEFT JOIN [@MIS_TAX] T5 ON T5.U_OINVDcNm = T0.DocNum " & _
+            '                "WHERE T0.DocStatus <> 'C' AND (T0.DocDate >= '" & oForm.Items.Item("DateFrom").Specific.value & "' AND T0.DocDate <= '" & oForm.Items.Item("DateTo").Specific.Value & "') " & _
+            '                "AND T0.CardCode Like '%" & oForm.Items.Item("Customer").Specific.Value & "%' " & _
+            '                "AND T0.DocEntry NOT IN (SELECT T3.U_OINVDocEntry From [@MIS_T3] T2 " & _
+            '                "INNER JOIN [@MIS_T3L] T3 ON T2.DocEntry = T3.DocEntry WHERE T3.U_T3LineStatus <> 'D' ) AND T4.ExtraDays > 0 ORDER BY T1.U_WilayahCollect, T0.CardCode, T0.DocNum "
             ARStatusQuery = "SELECT 'N' [AR Generate], T0.Docnum [Invoice No], T0.docentry [Invoice], T0.DocCur [Ccy],  " & _
                             "CASE WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T0.DocTotal ELSE T0.DocTotalFC END [Invoice Amount], " & _
-                            "CASE WHEN ISNULL(T5.U_DocTotal, 0) <> 0 THEN (T5.U_DocTotal - T5.U_TotUM + T5.U_PPNDPP) " & _
+                            "CASE WHEN ISNULL(T5.U_DocTotal, 0) <> 0 THEN " & _
+                            "   CASE WHEN T1.U_isPungut = 'PUNGUT' THEN " & _
+                            "       ( " & _
+                            "       CASE " & _
+                            "       WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T5.U_DPPinIDR " & _
+                            "       ELSE T5.U_DPPinVLS " & _
+                            "       End " & _
+                            "       + T5.U_PPNDPP " & _
+                            "       ) " & _
+                            "   ELSE " & _
+                            "       ( " & _
+                            "       CASE " & _
+                            "       WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T5.U_DPPinIDR " & _
+                            "       ELSE T5.U_DPPinVLS " & _
+                            "       End " & _
+                            "       ) " & _
+                            "   End " & _
                             "ELSE " & _
                             "	CASE WHEN LEFT(T0.CardCode, 2) = 'CP' THEN 0 " & _
                             "   ELSE T0.DocTotal End " & _
@@ -1300,11 +1330,81 @@ errHandler:
                             SBO_Application.MessageBox("Invoice#: " & oGenerateT3StatusGrid.DataTable.GetValue(("Invoice No"), oGenerateT3StatusGrid.GetDataTableRowIndex(idx).ToString) & " Amount = 0, tidak boleh digenerate!")
 
                         Else
+                            'strQry = "SELECT T0.CardCode AS CustomerCode, T0.CardName AS CustomerName, T1.U_WilayahCollect AS Wilayah, T0.DocEntry AS Invoice, T0.DocCur AS Currency, T0.U_ProjectDesc AS Project, T0.DocRate AS Rate, " & _
+                            '        " T0.DocNum AS InvoiceNo, T0.DocDate AS InvoiceDate, T0.DocDueDate AS DueDate, " & _
+                            '        " CASE" & _
+                            '        " WHEN ISNULL(T2.U_DocTotal, 0) <> 0 THEN " & _
+                            '        "   T2.U_DocTotal - T2.U_TotUM + T2.U_PPNDPP " & _
+                            '        " Else " & _
+                            '        "   CASE " & _
+                            '        "   WHEN LEFT(T0.CardCode, 2) = 'CP' THEN " & _
+                            '        "       ROUND(	" & _
+                            '        "           CASE " & _
+                            '        "           WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN " & _
+                            '        "               CASE " & _
+                            '        "               WHEN LEFT(T0.CardCode, 2) = 'CP' THEN " & _
+                            '        "                   (T0.DocTotal - T0.VatSum) " & _
+                            '        "               ELSE (T0.DocTotal - T0.VatSum) " & _
+                            '        "               End " & _
+                            '        "           Else " & _
+                            '        "               (T0.DocTotalFC - T0.VatSumFC) " & _
+                            '        "           END " & _
+                            '        "           + " & _
+                            '        "           CASE " & _
+                            '        "           WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  " & _
+                            '        "               CASE " & _
+                            '        "               WHEN T1.U_isPungut = 'PUNGUT' THEN " & _
+                            '        "                   (T0.VatSum) " & _
+                            '        "               Else " & _
+                            '        "                   0 " & _
+                            '        "               End " & _
+                            '        "           Else " & _
+                            '        "               CASE " & _
+                            '        "               WHEN T1.U_isPungut = 'PUNGUT' THEN " & _
+                            '        "                   (T0.VatSumFC) " & _
+                            '        "               Else " & _
+                            '        "                   0 " & _
+                            '        "               End " & _
+                            '        "           END " & _
+                            '        "           , " & _
+                            '        "           CASE " & _
+                            '        "           WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN 0 " & _
+                            '        "           ELSE 3 " & _
+                            '        "           END) " & _
+                            '        "   ELSE " & _
+                            '        "   	CASE " & _
+                            '        "       WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN " & _
+                            '        "           T0.DocTotal " & _
+                            '        "       Else " & _
+                            '        "           T0.DocTotalFC " & _
+                            '        "       END " & _
+                            '        "   End " & _
+                            '        "END t3_from_fp_or_inv, " & _
+                            '        " T0.DocTotal - T0.VatSum AS NetAmount, " & _
+                            '        " T0.VatSum AS VatSum, T0.DocTotal AS DocTotal, ISNULL(T2.U_TaxDcDt,'') AS TaxDate, Convert(Varchar(19),T2.U_TaxNum) AS NomorPajak " & _
+                            '        " FROM OINV T0 INNER JOIN OCRD T1 ON T0.CardCode = T1.CardCode LEFT JOIN [@MIS_TAX] T2 ON T0.DocEntry = T2.U_OinvDcEn " & _
+                            '        " WHERE T0.DocEntry = '" & oGenerateT3StatusGrid.DataTable.GetValue(("Invoice"), oGenerateT3StatusGrid.GetDataTableRowIndex(idx).ToString) & "'"
+
                             strQry = "SELECT T0.CardCode AS CustomerCode, T0.CardName AS CustomerName, T1.U_WilayahCollect AS Wilayah, T0.DocEntry AS Invoice, T0.DocCur AS Currency, T0.U_ProjectDesc AS Project, T0.DocRate AS Rate, " & _
                                     " T0.DocNum AS InvoiceNo, T0.DocDate AS InvoiceDate, T0.DocDueDate AS DueDate, " & _
                                     " CASE" & _
                                     " WHEN ISNULL(T2.U_DocTotal, 0) <> 0 THEN " & _
-                                    "   T2.U_DocTotal - T2.U_TotUM + T2.U_PPNDPP " & _
+                                    "   CASE WHEN T1.U_isPungut = 'PUNGUT' THEN " & _
+                                    "       ( " & _
+                                    "       CASE " & _
+                                    "       WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T2.U_DPPinIDR " & _
+                                    "       ELSE T2.U_DPPinVLS " & _
+                                    "       End " & _
+                                    "       + T2.U_PPNDPP " & _
+                                    "       ) " & _
+                                    "   ELSE " & _
+                                    "       ( " & _
+                                    "       CASE " & _
+                                    "       WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T2.U_DPPinIDR " & _
+                                    "       ELSE T2.U_DPPinVLS " & _
+                                    "       End " & _
+                                    "       ) " & _
+                                    "   End " & _
                                     " Else " & _
                                     "   CASE " & _
                                     "   WHEN LEFT(T0.CardCode, 2) = 'CP' THEN " & _
