@@ -2101,6 +2101,33 @@ Keluar:
         '            "AND [@MIS_T3].U_CardCode='" & oForm.Items.Item("CustCode").Specific.value & "'" & _
         '            "AND ([@MIS_T3L].U_OINVDocTotal- isnull(TPDCL.U_CollectAmount,0)-OINV.PaidSum)>0 "
 
+        'PdcQuery = "With TPDCL ( " & _
+        '            "U_T3DocEntry, U_T3LineId, U_OINVDocEntry, U_OINVDocNum, " & _
+        '            "U_CollectAmount) as " & _
+        '            "(SELECT [@MIS_PDCL].U_T3DocEntry, [@MIS_PDCL].U_T3LineId," & _
+        '            "[@MIS_PDCL].U_OINVDocEntry, [@MIS_PDCL].U_OINVDocNum,SUM([@MIS_PDCL].U_CollectAmount) " & _
+        '            "FROM [@MIS_PDCL] LEFT OUTER JOIN [@MIS_PDC] ON [@MIS_PDCL].DocEntry = [@MIS_PDC].DocEntry " & _
+        '            "WHERE [@MIS_PDC].U_PDCStatus = 'O' " & _
+        '            "group by [@MIS_PDCL].U_T3DocEntry, [@MIS_PDCL].U_T3LineId," & _
+        '            "[@MIS_PDCL].U_OINVDocEntry, [@MIS_PDCL].U_OINVDocNum)  " & _
+        '            "SELECT 'N' AS [Check], [@MIS_T3].DocNum AS [T3 No.],[@MIS_T3L].U_OINVDocEntry AS [Invoice Doc Entry],[@MIS_T3L].U_OINVDocNum AS [Invoice No.],  " & _
+        '            "[@MIS_T3L].U_OINVDocDate AS [Invoice Date],[@MIS_T3L].U_OINVDocDueDate AS [Due Date], " & _
+        '            "[@MIS_T3L].U_OINVDocTotal AS [Invoice Amount],  " & _
+        '            "[@MIS_T3L].U_OINVDocTotal - [@MIS_T3L].U_OINVDocTotal AS [Collection Amount],  " & _
+        '            "[@MIS_T3L].LineId AS [T3 Line No],  " & _
+        '            "[@MIS_T3].DocEntry AS [T3 DocEntry],  " & _
+        '            "isnull(TPDCL.U_CollectAmount,0) AS [Oustanding Pdc Amount],  " & _
+        '            "OINV.PaidSum AS [Paid Amount],  " & _
+        '            "[@MIS_T3L].U_OINVDocTotal-isnull(TPDCL.U_CollectAmount,0)-OINV.PaidSum as [Max Collection]  " & _
+        '            "FROM [@MIS_T3L] LEFT OUTER JOIN  " & _
+        '            "OINV ON [@MIS_T3L].U_OINVDocNum =OINV.DocNum LEFT OUTER JOIN  " & _
+        '            "TPDCL ON [@MIS_T3L].DocEntry =TPDCL.U_T3DocEntry AND   " & _
+        '            "[@MIS_T3L].LineId =TPDCL.U_T3LineId LEFT OUTER JOIN  " & _
+        '            "[@MIS_T3] ON [@MIS_T3L].DocEntry =[@MIS_T3].DocEntry  " & _
+        '            "WHERE ([@MIS_T3L].U_T3LineStatus = 'R')   " & _
+        '            "AND [@MIS_T3].U_CardCode='" & oForm.Items.Item("CustCode").Specific.value & "'" & _
+        '            "AND ([@MIS_T3L].U_OINVDocTotal- isnull(TPDCL.U_CollectAmount,0)-OINV.PaidSum)>0 "
+
         PdcQuery = "With TPDCL ( " & _
                     "U_T3DocEntry, U_T3LineId, U_OINVDocEntry, U_OINVDocNum, " & _
                     "U_CollectAmount) as " & _
@@ -2110,7 +2137,7 @@ Keluar:
                     "WHERE [@MIS_PDC].U_PDCStatus = 'O' " & _
                     "group by [@MIS_PDCL].U_T3DocEntry, [@MIS_PDCL].U_T3LineId," & _
                     "[@MIS_PDCL].U_OINVDocEntry, [@MIS_PDCL].U_OINVDocNum)  " & _
-                    "SELECT 'N' AS [Check], [@MIS_T3].DocNum AS [T3 No.],[@MIS_T3L].U_OINVDocEntry AS [Invoice Doc Entry],[@MIS_T3L].U_OINVDocNum AS [Invoice No.],  " & _
+                    "SELECT 'N' AS [Check], [@MIS_T3].DocNum AS [T3 No.], [@MIS_T3].U_KWIDocEntry AS [Old T3 No.], [@MIS_T3L].U_OINVDocEntry AS [Invoice Doc Entry], [@MIS_T3L].U_OINVDocNum AS [Invoice No.],  " & _
                     "[@MIS_T3L].U_OINVDocDate AS [Invoice Date],[@MIS_T3L].U_OINVDocDueDate AS [Due Date], " & _
                     "[@MIS_T3L].U_OINVDocTotal AS [Invoice Amount],  " & _
                     "[@MIS_T3L].U_OINVDocTotal - [@MIS_T3L].U_OINVDocTotal AS [Collection Amount],  " & _
@@ -2152,12 +2179,17 @@ Keluar:
         PdcGrid.Columns.Item("T3 No.").Type = SAPbouiCOM.BoGridColumnType.gct_EditText
         PdcGrid.Columns.Item("T3 No.").TitleObject.Sortable = True
         PdcGrid.Columns.Item("T3 No.").Editable = False
-        PdcGrid.Columns.Item("T3 No.").Width = 70
+        PdcGrid.Columns.Item("T3 No.").Width = 60
+
+        PdcGrid.Columns.Item("Old T3 No.").Type = SAPbouiCOM.BoGridColumnType.gct_EditText
+        PdcGrid.Columns.Item("Old T3 No.").TitleObject.Sortable = True
+        PdcGrid.Columns.Item("Old T3 No.").Editable = False
+        PdcGrid.Columns.Item("Old T3 No.").Width = 60
 
         PdcGrid.Columns.Item("Invoice No.").Type = SAPbouiCOM.BoGridColumnType.gct_EditText
         PdcGrid.Columns.Item("Invoice No.").TitleObject.Sortable = True
         PdcGrid.Columns.Item("Invoice No.").Editable = False
-        PdcGrid.Columns.Item("Invoice No.").Width = 90
+        PdcGrid.Columns.Item("Invoice No.").Width = 60
 
         oColumn = PdcGrid.Columns.Item("Invoice Doc Entry")
         oColumn.LinkedObjectType = SAPbouiCOM.BoLinkedObject.lf_Invoice
