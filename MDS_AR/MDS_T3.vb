@@ -119,6 +119,33 @@ Public Class MDS_T3
                 objMatrixPayment = oFormMain.Items.Item("20").Specific
                 objColumnsPayment = objMatrixPayment.Columns
 
+                'Dim oCompSrv As SAPbobsCOM.CompanyService = oCompany.GetCompanyService
+                ''oCompSrv = oCompany.GetCompanyService
+
+                'Dim oCompAdminInfo As SAPbobsCOM.AdminInfo = oCompSrv.GetAdminInfo
+                ''oCompAdminInfo = oCompSrv.GetAdminInfo
+
+                'Dim DecSeparator As String = oCompAdminInfo.DecimalSeparator
+                ''DecSeparator = oCompAdminInfo.DecimalSeparator
+
+                'Dim oCcy As SAPbobsCOM.Currencies = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oCurrencyCodes)
+
+                'Dim oBool As Boolean = False
+                ''oBool = oCcy.GetByKey("IDR")
+                'oBool = oCcy.GetByKey("AUD")
+
+                ''Dim ccycode As String = oCcy.Code
+                ''Dim MaxInAmtDiff As Double = oCcy.MaxIncomingAmtDiff
+
+                'Dim listCcyMaxInDiff As New List(Of String)
+
+                'oCcy.Browser.MoveFirst()
+                'For i = 0 To oCcy.Browser.RecordCount
+                '    listCcyMaxInDiff.Add(oCcy.Code.ToString + oCcy.MaxIncomingAmtDiff.ToString)
+                '    oCcy.Browser.MoveNext()
+                'Next
+
+
                 If oFormMain.Items.Item("5").Specific.value = "" Then
                     SBO_Application.SetStatusBarMessage("BP Code Must fill", SAPbouiCOM.BoMessageTime.bmt_Short)
                     BubbleEvent = False
@@ -134,27 +161,60 @@ Public Class MDS_T3
                 End If
 
                 If BubbleEvent = True Then
-                    For I = 1 To objMatrixPayment.RowCount
+                    For i = 1 To objMatrixPayment.RowCount
 
-                        strsql = "SELECT T1.U_OINVDocNum,T1.U_CollectAmount,T0.U_CardCode " & _
-                            "FROM [@MIS_PDC] AS T0 RIGHT OUTER JOIN [@MIS_PDCL] AS T1 ON T1.DocEntry = T0.DocEntry " & _
-                            "WHERE T0.U_CardCode='" & oFormMain.Items.Item("5").Specific.value & "' AND " & _
-                            "T0.U_PDCBankID='" & oFormUdf.Items.Item("U_PDCBankID").Specific.value & "' AND " & _
-                            "T0.U_PDCNo='" & oFormUdf.Items.Item("U_PDCNo").Specific.value & "' AND " & _
-                            "T1.U_OINVDocNum='" & objColumnsPayment.Item("1").Cells.Item(I).Specific.value & "'"
+                        'strsql = "SELECT T1.U_OINVDocNum,T1.U_CollectAmount,T0.U_CardCode " & _
+                        '    "FROM [@MIS_PDC] AS T0 RIGHT OUTER JOIN [@MIS_PDCL] AS T1 ON T1.DocEntry = T0.DocEntry " & _
+                        '    "WHERE T0.U_CardCode='" & oFormMain.Items.Item("5").Specific.value & "' AND " & _
+                        '    "T0.U_PDCBankID='" & oFormUdf.Items.Item("U_PDCBankID").Specific.value & "' AND " & _
+                        '    "T0.U_PDCNo='" & oFormUdf.Items.Item("U_PDCNo").Specific.value & "' AND " & _
+                        '    "T1.U_OINVDocNum='" & objColumnsPayment.Item("1").Cells.Item(i).Specific.value & "'"
+
+
+                        strsql = "SELECT T0.U_OINVDocNum, ISNULL(T0.U_CollectAmount, 0) U_CollectAmount, T1.U_CardCode, " & _
+                            "T2.DocCur, T3.MaxInDiff, T4.DecSep " & _
+                            "FROM [@MIS_PDCL] T0 " & _
+                            "LEFT JOIN [@MIS_PDC] T1 ON T0.DocEntry = T1.DocEntry " & _
+                            "LEFT JOIN OINV T2 ON T2.DocEntry = T0.U_OINVDocEntry " & _
+                            "LEFT JOIN OCRN T3 ON T3.CurrCode = T2.DocCur " & _
+                            "LEFT JOIN OADM T4 ON 1=1 " & _
+                            "WHERE T1.U_CardCode='" & oFormMain.Items.Item("5").Specific.value & "' AND " & _
+                            "T1.U_PDCBankID='" & oFormUdf.Items.Item("U_PDCBankID").Specific.value & "' AND " & _
+                            "T1.U_PDCNo='" & oFormUdf.Items.Item("U_PDCNo").Specific.value & "' AND " & _
+                            "T0.U_OINVDocNum='" & objColumnsPayment.Item("1").Cells.Item(i).Specific.value & "'"
+
                         oRecSet.DoQuery(strsql)
 
                         If oRecSet.RecordCount > 0 Then
-                            objColumnsPayment.Item("10000127").Cells.Item(I).Specific.Checked = True
-                            objColumnsPayment.Item("24").Cells.Item(I).Specific.value = oRecSet.Fields.Item("U_CollectAmount").Value
+                            objColumnsPayment.Item("10000127").Cells.Item(i).Specific.Checked = True
+
+                            Dim selisih As Double
+                            'selisih = CDbl(objColumnsPayment.Item("7").Cells.Item(I).Specific.value) - CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
+
+                            'Dim sValue As String = Regex.Replace(sInput, "[^0-9\" + sDecSep + "]", "")
+                            Dim sBalanceDue As String = System.Text.RegularExpressions.Regex.Replace(objColumnsPayment.Item("7").Cells.Item(i).Specific.value, _
+                                                                 "[^0-9\" + oRecSet.Fields.Item("DecSep").Value + "]", "")
+
+                            selisih = CDbl(IIf(sBalanceDue = "", 0, sBalanceDue)) - CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
+
+                            'If objColumnsPayment.Item("7").Cells.Item(I).Specific.value = oRecSet.Fields.Item("U_CollectAmount").Value Then
+                            If CDbl(sBalanceDue) = CDbl(oRecSet.Fields.Item("U_CollectAmount").Value) Then
+                                objColumnsPayment.Item("24").Cells.Item(i).Specific.value = _
+                                  CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
+                                'ElseIf Math.Abs(selisih) < 5000 Then
+                            ElseIf Math.Abs(selisih) < oRecSet.Fields.Item("MaxInDiff").Value Then
+                                objColumnsPayment.Item("24").Cells.Item(i).Specific.value = sBalanceDue
+                                'objColumnsPayment.Item("24").Cells.Item(i).Specific.value = oRecSet.Fields.Item("U_CollectAmount").Value
+                            End If
+
                         Else
-                            objColumnsPayment.Item("10000127").Cells.Item(I).Specific.Checked = False
-                            objColumnsPayment.Item("24").Cells.Item(I).Specific.value = objColumnsPayment.Item("7").Cells.Item(I).Specific.value
+                            objColumnsPayment.Item("10000127").Cells.Item(i).Specific.Checked = False
+                            objColumnsPayment.Item("24").Cells.Item(i).Specific.value = objColumnsPayment.Item("7").Cells.Item(i).Specific.value
                         End If
 
                     Next
                 End If
-               
+
                 oFormUdf = Nothing
                 oFormMain = Nothing
                 objColumnsPayment = Nothing
@@ -2419,7 +2479,7 @@ Keluar:
         oGeneralParams = oGeneralService.GetDataInterface(SAPbobsCOM.GeneralServiceDataInterfaces.gsGeneralDataParams)
         oGeneralData = oGeneralService.GetDataInterface(SAPbobsCOM.GeneralServiceDataInterfaces.gsGeneralData)
 
-        oGeneralData.SetProperty("Series", strseries)
+        oGeneralData.SetProperty("Series", Trim(strseries))
         oGeneralData.SetProperty("U_PDCBankID", oForm.Items.Item("PdcBank").Specific.value)
         oGeneralData.SetProperty("U_PDCBankName", oForm.Items.Item("BankNm").Specific.value)
         oGeneralData.SetProperty("U_PDCNo", oForm.Items.Item("PdcNo").Specific.value)
