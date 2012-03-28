@@ -105,6 +105,119 @@ Public Class MDS_T3
         PdcInputAplicationItem(FormUID, pVal, BubbleEvent)
         PdcTolakAplicationItem(FormUID, pVal, BubbleEvent)
 
+        If pVal.FormTypeEx = "170" Then
+
+            'And pVal.BeforeAction = False _
+
+            'In case BP CardCode Changed.
+            'loading FP No Seri based on SAP AR Inv#
+            If pVal.ItemUID = "5" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_LOST_FOCUS _
+                And (pVal.EventType <> SAPbouiCOM.BoEventTypes.et_FORM_LOAD _
+                Or pVal.EventType <> SAPbouiCOM.BoEventTypes.et_FORM_CLOSE) Then
+                'Then
+                Dim oForm As SAPbouiCOM.Form
+                oForm = SBO_Application.Forms.Item(FormUID)
+
+                Dim strsql As String
+                Dim oRecSetFP As SAPbobsCOM.Recordset = Nothing
+                Dim objColumnsPayment As SAPbouiCOM.Columns = Nothing
+                Dim objMatrixPayment As SAPbouiCOM.Matrix = Nothing
+
+                oRecSetFP = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
+                objMatrixPayment = oForm.Items.Item("20").Specific
+                objColumnsPayment = objMatrixPayment.Columns
+
+                Dim duration As Integer
+                Dim strTime As DateTime = Now().ToString("HH:mm:ss")
+                Dim endTime As DateTime
+
+                'oForm.Freeze(True)
+                If BubbleEvent = True Then
+                    For i = 1 To objMatrixPayment.RowCount
+
+                        'strsql = "SELECT T0.U_OINVDocNum, ISNULL(T0.U_CollectAmount, 0) U_CollectAmount, T1.U_CardCode, " & _
+                        '    "T2.DocCur, T3.MaxInDiff, T4.DecSep " & _
+                        '    "FROM [@MIS_PDCL] T0 " & _
+                        '    "LEFT JOIN [@MIS_PDC] T1 ON T0.DocEntry = T1.DocEntry " & _
+                        '    "LEFT JOIN OINV T2 ON T2.DocEntry = T0.U_OINVDocEntry " & _
+                        '    "LEFT JOIN OCRN T3 ON T3.CurrCode = T2.DocCur " & _
+                        '    "LEFT JOIN OADM T4 ON 1=1 " & _
+                        '    "WHERE T1.U_CardCode='" & oFormMain.Items.Item("5").Specific.value & "' AND " & _
+                        '    "T1.U_PDCBankID='" & oFormUdf.Items.Item("U_PDCBankID").Specific.value & "' AND " & _
+                        '    "T1.U_PDCNo='" & oFormUdf.Items.Item("U_PDCNo").Specific.value & "' AND " & _
+                        '    "T0.U_OINVDocNum='" & objColumnsPayment.Item("1").Cells.Item(i).Specific.value & "'"
+
+                        Dim sapinv As String
+                        sapinv = objColumnsPayment.Item("1").Cells.Item(i).Specific.value
+
+                        strsql = "SELECT U_TAXTaxNum FROM [@MIS_T3L] T0 WHERE U_OINVDocNum = '" & _
+                            CStr(objColumnsPayment.Item("1").Cells.Item(i).Specific.value) & "' "
+
+                        'strsql = "SELECT U_TAXTaxNum FROM [@MIS_T3L] T0 " '& _
+                        'sapinv & " "
+
+                        oRecSetFP.DoQuery(strsql)
+
+                        If oRecSetFP.RecordCount > 0 Then
+                            objColumnsPayment.Item("U_FPNoSeri").Cells.Item(i).Specific.value = _
+                            "112"
+
+                            '    objColumnsPayment.Item("10000127").Cells.Item(i).Specific.Checked = True
+
+                            '    Dim selisih As Double
+                            '    'selisih = CDbl(objColumnsPayment.Item("7").Cells.Item(I).Specific.value) - CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
+
+                            '    'Dim sValue As String = Regex.Replace(sInput, "[^0-9\" + sDecSep + "]", "")
+                            '    Dim sBalanceDue As String = System.Text.RegularExpressions.Regex.Replace(objColumnsPayment.Item("7").Cells.Item(i).Specific.value, _
+                            '                                         "[^0-9\" + oRecSet.Fields.Item("DecSep").Value + "]", "")
+
+                            '    selisih = CDbl(IIf(sBalanceDue = "", 0, sBalanceDue)) - CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
+
+                            '    'If objColumnsPayment.Item("7").Cells.Item(I).Specific.value = _
+                            '    'oRecSet.Fields.Item("U_CollectAmount").Value Then
+                            '    If CDbl(sBalanceDue) = CDbl(oRecSet.Fields.Item("U_CollectAmount").Value) Then
+                            '        objColumnsPayment.Item("24").Cells.Item(i).Specific.value = _
+                            '          CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
+                            '        'ElseIf Math.Abs(selisih) < 5000 Then
+                            '    ElseIf Math.Abs(selisih) < oRecSet.Fields.Item("MaxInDiff").Value Then
+                            '        objColumnsPayment.Item("24").Cells.Item(i).Specific.value = sBalanceDue
+                            '        'objColumnsPayment.Item("24").Cells.Item(i).Specific.value = oRecSet.Fields.Item("U_CollectAmount").Value
+                            '    End If
+
+                            'Else
+                            '    objColumnsPayment.Item("10000127").Cells.Item(i).Specific.Checked = False
+                            '    objColumnsPayment.Item("24").Cells.Item(i).Specific.value = objColumnsPayment.Item("7").Cells.Item(i).Specific.value
+                        Else
+                            objColumnsPayment.Item("U_FPNoSeri").Cells.Item(i).Specific.value = _
+                            "111"
+
+                        End If
+
+
+                    Next
+                End If
+
+                endTime = Now().ToString("HH:mm:ss")
+                SBO_Application.MessageBox("start Time: " & strTime & " end: " & endTime)
+
+                oForm.Freeze(False)
+
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(oRecSetFP)
+                oRecSetFP = Nothing
+
+                'System.Runtime.InteropServices.Marshal.ReleaseComObject(oForm)
+
+                oForm = Nothing
+                objColumnsPayment = Nothing
+                objMatrixPayment = Nothing
+
+                'If oForm.Items.Item("T3Number").Specific.value <> "" Then
+                '    LostFocusCollect(oForm)
+                'End If
+            End If
+
+        End If
+
         If pVal.FormTypeEx = "-170" Then
             If pVal.ItemUID = "U_PDCNo" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_LOST_FOCUS And pVal.ActionSuccess = True Then
                 Dim oFormUdf As SAPbouiCOM.Form = Nothing
@@ -119,6 +232,7 @@ Public Class MDS_T3
                 objMatrixPayment = oFormMain.Items.Item("20").Specific
                 objColumnsPayment = objMatrixPayment.Columns
 
+                ' DO NOT USE DI API Company objec - AdminInfo (decimal separator) !!!
                 'Dim oCompSrv As SAPbobsCOM.CompanyService = oCompany.GetCompanyService
                 ''oCompSrv = oCompany.GetCompanyService
 
@@ -132,7 +246,6 @@ Public Class MDS_T3
 
                 'Dim oBool As Boolean = False
                 ''oBool = oCcy.GetByKey("IDR")
-                'oBool = oCcy.GetByKey("AUD")
 
                 ''Dim ccycode As String = oCcy.Code
                 ''Dim MaxInAmtDiff As Double = oCcy.MaxIncomingAmtDiff
@@ -197,7 +310,8 @@ Public Class MDS_T3
 
                             selisih = CDbl(IIf(sBalanceDue = "", 0, sBalanceDue)) - CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
 
-                            'If objColumnsPayment.Item("7").Cells.Item(I).Specific.value = oRecSet.Fields.Item("U_CollectAmount").Value Then
+                            'If objColumnsPayment.Item("7").Cells.Item(I).Specific.value = _
+                            'oRecSet.Fields.Item("U_CollectAmount").Value Then
                             If CDbl(sBalanceDue) = CDbl(oRecSet.Fields.Item("U_CollectAmount").Value) Then
                                 objColumnsPayment.Item("24").Cells.Item(i).Specific.value = _
                                   CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
@@ -266,56 +380,56 @@ Public Class MDS_T3
 
                 'karno Input T3 Tahap 3 (2011.05.30 09:41:00)
             Case "InputReceiptT3"
-                    If pVal.BeforeAction = True Then
-                        If pVal.ColUID = "Receipt T3" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_CLICK And pVal.Row = -1 Then
-                            Dim oForm As SAPbouiCOM.Form
-                            oForm = SBO_Application.Forms.Item(FormUID)
-                            Dim oInputT3StatusGrid As SAPbouiCOM.Grid = Nothing
-                            Dim dt As SAPbouiCOM.DataTable
-                            dt = oForm.DataSources.DataTables.Item("InT3StatusLst")
-                            oInputT3StatusGrid = oForm.Items.Item("myGridGen").Specific
-                            SelectUnselect(oForm)
-                        End If
-                    End If
-
-                    If pVal.ItemUID = "ColCode" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_LOST_FOCUS Then
+                If pVal.BeforeAction = True Then
+                    If pVal.ColUID = "Receipt T3" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_CLICK And pVal.Row = -1 Then
                         Dim oForm As SAPbouiCOM.Form
                         oForm = SBO_Application.Forms.Item(FormUID)
-                        LostFocusCardCode(oForm)
+                        Dim oInputT3StatusGrid As SAPbouiCOM.Grid = Nothing
+                        Dim dt As SAPbouiCOM.DataTable
+                        dt = oForm.DataSources.DataTables.Item("InT3StatusLst")
+                        oInputT3StatusGrid = oForm.Items.Item("myGridGen").Specific
+                        SelectUnselect(oForm)
+                    End If
+                End If
 
-                    ElseIf pVal.ItemUID = "BtnShow" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
-                        If pVal.BeforeAction = True Then
-                            Dim oForm As SAPbouiCOM.Form
-                            oForm = SBO_Application.Forms.Item(FormUID)
-                            Dim oInputT3StatusGrid As SAPbouiCOM.Grid = Nothing
+                If pVal.ItemUID = "ColCode" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_LOST_FOCUS Then
+                    Dim oForm As SAPbouiCOM.Form
+                    oForm = SBO_Application.Forms.Item(FormUID)
+                    LostFocusCardCode(oForm)
 
-                            Dim dt As SAPbouiCOM.DataTable
+                ElseIf pVal.ItemUID = "BtnShow" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
+                    If pVal.BeforeAction = True Then
+                        Dim oForm As SAPbouiCOM.Form
+                        oForm = SBO_Application.Forms.Item(FormUID)
+                        Dim oInputT3StatusGrid As SAPbouiCOM.Grid = Nothing
 
-                            dt = oForm.DataSources.DataTables.Item("InT3StatusLst")
+                        Dim dt As SAPbouiCOM.DataTable
 
-                            oInputT3StatusGrid = oForm.Items.Item("myGridGen").Specific
+                        dt = oForm.DataSources.DataTables.Item("InT3StatusLst")
 
-                            InputT3Show(oForm)
-                        End If
+                        oInputT3StatusGrid = oForm.Items.Item("myGridGen").Specific
 
-                    ElseIf pVal.ItemUID = "BtnAdd" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
-                        If pVal.BeforeAction = True Then
-                            Dim oForm As SAPbouiCOM.Form
-                            oForm = SBO_Application.Forms.Item(FormUID)
-                            Dim oInputT3StatusGrid As SAPbouiCOM.Grid = Nothing
-
-                            Dim dt As SAPbouiCOM.DataTable
-
-                            dt = oForm.DataSources.DataTables.Item("InT3StatusLst")
-
-                            oInputT3StatusGrid = oForm.Items.Item("myGridGen").Specific
-
-                            InputT3Status(oForm)
-                            InputT3Show(oForm)
-                        End If
+                        InputT3Show(oForm)
                     End If
 
-                    'karno generate T3 Tahap 3 (2011.05.26 16:35:00)
+                ElseIf pVal.ItemUID = "BtnAdd" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
+                    If pVal.BeforeAction = True Then
+                        Dim oForm As SAPbouiCOM.Form
+                        oForm = SBO_Application.Forms.Item(FormUID)
+                        Dim oInputT3StatusGrid As SAPbouiCOM.Grid = Nothing
+
+                        Dim dt As SAPbouiCOM.DataTable
+
+                        dt = oForm.DataSources.DataTables.Item("InT3StatusLst")
+
+                        oInputT3StatusGrid = oForm.Items.Item("myGridGen").Specific
+
+                        InputT3Status(oForm)
+                        InputT3Show(oForm)
+                    End If
+                End If
+
+                'karno generate T3 Tahap 3 (2011.05.26 16:35:00)
             Case "GenerateT3"
                 If pVal.BeforeAction = True Then
                     If pVal.ColUID = "AR Generate" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_CLICK And pVal.Row = -1 Then
@@ -980,7 +1094,39 @@ Public Class MDS_T3
             '                "AND T0.CardCode Like '%" & oForm.Items.Item("Customer").Specific.Value & "%' " & _
             '                "AND T0.DocEntry NOT IN (SELECT T3.U_OINVDocEntry From [@MIS_T3] T2 " & _
             '                "INNER JOIN [@MIS_T3L] T3 ON T2.DocEntry = T3.DocEntry WHERE T3.U_T3LineStatus <> 'D' ) AND T4.ExtraDays > 0 ORDER BY T1.U_WilayahCollect, T0.CardCode, T0.DocNum "
-            ARStatusQuery = "SELECT 'N' [AR Generate], T0.Docnum [Invoice No], T0.docentry [Invoice], T0.DocCur [Ccy],  " & _
+
+            'ARStatusQuery = "SELECT 'N' [AR Generate], T0.Docnum [Invoice No], T0.docentry [Invoice], T0.DocCur [Ccy],  " & _
+            '                "CASE WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T0.DocTotal ELSE T0.DocTotalFC END [Invoice Amount], " & _
+            '                "CASE WHEN ISNULL(T5.U_DocTotal, 0) <> 0 THEN " & _
+            '                "   CASE WHEN T1.U_isPungut = 'PUNGUT' THEN " & _
+            '                "       ( " & _
+            '                "       CASE " & _
+            '                "       WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T5.U_DPPinIDR " & _
+            '                "       ELSE T5.U_DPPinVLS " & _
+            '                "       End " & _
+            '                "       + T5.U_PPNDPP " & _
+            '                "       ) " & _
+            '                "   ELSE " & _
+            '                "       ( " & _
+            '                "       CASE " & _
+            '                "       WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T5.U_DPPinIDR " & _
+            '                "       ELSE T5.U_DPPinVLS " & _
+            '                "       End " & _
+            '                "       ) " & _
+            '                "   End " & _
+            '                "ELSE " & _
+            '                "	CASE WHEN LEFT(T0.CardCode, 2) = 'CP' THEN 0 " & _
+            '                "   ELSE T0.DocTotal End " & _
+            '                "END [FP Amount], T0.U_ProjectDesc [Project], T0.DocDate [Invoice Date], " & _
+            '                "T0.DocDueDate [Due Date], T1.U_WilayahCollect [Wilayah], T0.CardCode [Customer Code], T0.CardName [Customer Name], T0.Address [Address] From OINV T0 " & _
+            '                "INNER JOIN OCRD T1 ON T0.CardCode = T1.CardCode INNER JOIN OCTG T4 ON T0.GroupNum = T4.GroupNum " & _
+            '                "LEFT JOIN [@MIS_TAX] T5 ON T5.U_OINVDcNm = T0.DocNum " & _
+            '                "WHERE T0.DocStatus <> 'C' AND (T0.DocDate >= '" & oForm.Items.Item("DateFrom").Specific.value & "' AND T0.DocDate <= '" & oForm.Items.Item("DateTo").Specific.Value & "') " & _
+            '                "AND T0.CardCode Like '%" & oForm.Items.Item("Customer").Specific.Value & "%' " & _
+            '                "AND T0.DocEntry NOT IN (SELECT T3.U_OINVDocEntry From [@MIS_T3] T2 " & _
+            '                "INNER JOIN [@MIS_T3L] T3 ON T2.DocEntry = T3.DocEntry WHERE T3.U_T3LineStatus <> 'D' ) AND T4.ExtraDays > 0 ORDER BY T1.U_WilayahCollect, T0.CardCode, T0.DocNum "
+
+            ARStatusQuery = "SELECT 'N' [AR Generate], T0.Docnum [Invoice No], T0.docentry [Invoice], T5.U_TaxNum [FP#], T0.DocCur [Ccy],  " & _
                             "CASE WHEN (SELECT MainCurncy FROM DBO.OADM) = T0.DocCur THEN  T0.DocTotal ELSE T0.DocTotalFC END [Invoice Amount], " & _
                             "CASE WHEN ISNULL(T5.U_DocTotal, 0) <> 0 THEN " & _
                             "   CASE WHEN T1.U_isPungut = 'PUNGUT' THEN " & _
@@ -1019,6 +1165,10 @@ Public Class MDS_T3
         oGenerateT3StatusGrid.Columns.Item("AR Generate").Type = SAPbouiCOM.BoGridColumnType.gct_CheckBox
         oGenerateT3StatusGrid.Columns.Item("AR Generate").TitleObject.Sortable = True
 
+
+        oColumn = oGenerateT3StatusGrid.Columns.Item("FP#")
+        oGenerateT3StatusGrid.Columns.Item("FP#").TitleObject.Sortable = True
+        oColumn.Editable = False
 
         oColumn = oGenerateT3StatusGrid.Columns.Item("Invoice No")
         oGenerateT3StatusGrid.Columns.Item("Invoice No").TitleObject.Sortable = True
@@ -2197,7 +2347,8 @@ Keluar:
                     "WHERE [@MIS_PDC].U_PDCStatus = 'O' " & _
                     "group by [@MIS_PDCL].U_T3DocEntry, [@MIS_PDCL].U_T3LineId," & _
                     "[@MIS_PDCL].U_OINVDocEntry, [@MIS_PDCL].U_OINVDocNum)  " & _
-                    "SELECT 'N' AS [Check], [@MIS_T3].DocNum AS [T3 No.], [@MIS_T3].U_KWIDocEntry AS [Old T3 No.], [@MIS_T3L].U_OINVDocEntry AS [Invoice Doc Entry], [@MIS_T3L].U_OINVDocNum AS [Invoice No.],  " & _
+                    "SELECT 'N' AS [Check], [@MIS_T3].DocNum AS [T3 No.], [@MIS_T3L].U_TaxTaxNum [FP#], " & _
+                    "[@MIS_T3].U_KWIDocEntry AS [Old T3 No.], [@MIS_T3L].U_OINVDocEntry AS [Invoice Doc Entry], [@MIS_T3L].U_OINVDocNum AS [Invoice No.],  " & _
                     "[@MIS_T3L].U_OINVDocDate AS [Invoice Date],[@MIS_T3L].U_OINVDocDueDate AS [Due Date], " & _
                     "[@MIS_T3L].U_OINVDocTotal AS [Invoice Amount],  " & _
                     "[@MIS_T3L].U_OINVDocTotal - [@MIS_T3L].U_OINVDocTotal AS [Collection Amount],  " & _
@@ -2240,6 +2391,11 @@ Keluar:
         PdcGrid.Columns.Item("T3 No.").TitleObject.Sortable = True
         PdcGrid.Columns.Item("T3 No.").Editable = False
         PdcGrid.Columns.Item("T3 No.").Width = 60
+
+        PdcGrid.Columns.Item("FP#").Type = SAPbouiCOM.BoGridColumnType.gct_EditText
+        PdcGrid.Columns.Item("FP#").TitleObject.Sortable = True
+        PdcGrid.Columns.Item("FP#").Editable = False
+        PdcGrid.Columns.Item("FP#").Width = 100
 
         PdcGrid.Columns.Item("Old T3 No.").Type = SAPbouiCOM.BoGridColumnType.gct_EditText
         PdcGrid.Columns.Item("Old T3 No.").TitleObject.Sortable = True
@@ -3094,8 +3250,31 @@ Keluar:
 
 
 
+        'PdcQuery = "SELECT [@MIS_PDCL].LineId as [Pdc Line], " & _
+        '           "[@MIS_T3].DocNum as [T3 No.], " & _
+        '           "[@MIS_PDCL].U_OINVDocEntry as [Invoice Doc Entry], " & _
+        '           "[@MIS_PDCL].U_OINVDocNum as [Invoice No.], " & _
+        '           "[@MIS_T3L].U_OINVDocDate as [Invoice Date]," & _
+        '           "[@MIS_T3L].U_OINVDocDueDate as [Due Date], " & _
+        '           "[@MIS_T3L].U_OINVDocTotal as [Invoice Amount]," & _
+        '           "[@MIS_PDCL].U_CollectAmount as [Collection Amount], " & _
+        '           "[@MIS_PDCL].DocEntry as [Pdc Doc Entry], " & _
+        '           "[@MIS_PDC].U_PDCDate as [Pdc Date], " & _
+        '           "[@MIS_PDC].U_PDCAmount as [Pdc Amount], " & _
+        '           "[@MIS_PDCL].U_T3DocEntry as [T3 Doc Entry], " & _
+        '           "[@MIS_PDCL].U_T3LineId as [T3 Line No] " & _
+        '           "FROM [@MIS_T3] RIGHT OUTER JOIN " & _
+        '           "[@MIS_T3L] ON [@MIS_T3].DocEntry =[@MIS_T3L].DocEntry RIGHT OUTER JOIN " & _
+        '           "[@MIS_PDCL] INNER JOIN " & _
+        '           "[@MIS_PDC] ON [@MIS_PDCL].DocEntry =[@MIS_PDC].DocEntry ON [@MIS_T3L].DocEntry =[@MIS_PDCL].U_T3DocEntry AND " & _
+        '           "[@MIS_T3L].LineId =[@MIS_PDCL].U_T3LineId where U_PDCStatus='O' And " & _
+        '           "[@MIS_PDC].U_CardCode='" & oForm.Items.Item("CustCode").Specific.value & "' " & _
+        '           "and [@MIS_PDC].U_PDCBankID ='" & oForm.Items.Item("PdcBank").Specific.value & "' " & _
+        '           "and  [@MIS_PDC].U_PDCNo='" & oForm.Items.Item("PdcNo").Specific.value & "' order by [@MIS_PDCL].LineId "
+
+
         PdcQuery = "SELECT [@MIS_PDCL].LineId as [Pdc Line], " & _
-                   "[@MIS_T3].DocNum as [T3 No.], " & _
+                   "[@MIS_T3].DocNum as [T3 No.], [@MIS_T3L].U_TaxTaxNum as [FP#], " & _
                    "[@MIS_PDCL].U_OINVDocEntry as [Invoice Doc Entry], " & _
                    "[@MIS_PDCL].U_OINVDocNum as [Invoice No.], " & _
                    "[@MIS_T3L].U_OINVDocDate as [Invoice Date]," & _
@@ -3118,7 +3297,6 @@ Keluar:
 
 
 
-
         ' Grid #: 1
 
 
@@ -3137,6 +3315,11 @@ Keluar:
         PdcGrid.Columns.Item("T3 No.").TitleObject.Sortable = True
         PdcGrid.Columns.Item("T3 No.").Editable = False
         PdcGrid.Columns.Item("T3 No.").Width = 100
+
+        PdcGrid.Columns.Item("FP#").Type = SAPbouiCOM.BoGridColumnType.gct_EditText
+        PdcGrid.Columns.Item("FP#").TitleObject.Sortable = True
+        PdcGrid.Columns.Item("FP#").Editable = False
+        PdcGrid.Columns.Item("FP#").Width = 100
 
         PdcGrid.Columns.Item("Invoice No.").Type = SAPbouiCOM.BoGridColumnType.gct_EditText
         PdcGrid.Columns.Item("Invoice No.").TitleObject.Sortable = True
