@@ -100,120 +100,157 @@ Public Class MDS_T3
         End If
     End Sub
 
+    Dim isFormIncomingPayment_Closed As Boolean
 
     Private Sub SBO_Application_ItemEvent(ByVal FormUID As String, ByRef pVal As SAPbouiCOM.ItemEvent, ByRef BubbleEvent As Boolean) Handles SBO_Application.ItemEvent
         PdcInputAplicationItem(FormUID, pVal, BubbleEvent)
         PdcTolakAplicationItem(FormUID, pVal, BubbleEvent)
 
         If pVal.FormTypeEx = "170" Then
-
             'And pVal.BeforeAction = False _
 
             'In case BP CardCode Changed.
             'loading FP No Seri based on SAP AR Inv#
-            If pVal.ItemUID = "5" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_LOST_FOCUS _
-                And (pVal.EventType <> SAPbouiCOM.BoEventTypes.et_FORM_LOAD _
-                Or pVal.EventType <> SAPbouiCOM.BoEventTypes.et_FORM_CLOSE) Then
-                'Then
-                Dim oForm As SAPbouiCOM.Form
-                oForm = SBO_Application.Forms.Item(FormUID)
-
-                Dim strsql As String
-                Dim oRecSetFP As SAPbobsCOM.Recordset = Nothing
-                Dim objColumnsPayment As SAPbouiCOM.Columns = Nothing
-                Dim objMatrixPayment As SAPbouiCOM.Matrix = Nothing
-
-                oRecSetFP = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
-                objMatrixPayment = oForm.Items.Item("20").Specific
-                objColumnsPayment = objMatrixPayment.Columns
-
-                Dim duration As Integer
-                Dim strTime As DateTime = Now().ToString("HH:mm:ss")
-                Dim endTime As DateTime
-
-                'oForm.Freeze(True)
-                If BubbleEvent = True Then
-                    For i = 1 To objMatrixPayment.RowCount
-
-                        'strsql = "SELECT T0.U_OINVDocNum, ISNULL(T0.U_CollectAmount, 0) U_CollectAmount, T1.U_CardCode, " & _
-                        '    "T2.DocCur, T3.MaxInDiff, T4.DecSep " & _
-                        '    "FROM [@MIS_PDCL] T0 " & _
-                        '    "LEFT JOIN [@MIS_PDC] T1 ON T0.DocEntry = T1.DocEntry " & _
-                        '    "LEFT JOIN OINV T2 ON T2.DocEntry = T0.U_OINVDocEntry " & _
-                        '    "LEFT JOIN OCRN T3 ON T3.CurrCode = T2.DocCur " & _
-                        '    "LEFT JOIN OADM T4 ON 1=1 " & _
-                        '    "WHERE T1.U_CardCode='" & oFormMain.Items.Item("5").Specific.value & "' AND " & _
-                        '    "T1.U_PDCBankID='" & oFormUdf.Items.Item("U_PDCBankID").Specific.value & "' AND " & _
-                        '    "T1.U_PDCNo='" & oFormUdf.Items.Item("U_PDCNo").Specific.value & "' AND " & _
-                        '    "T0.U_OINVDocNum='" & objColumnsPayment.Item("1").Cells.Item(i).Specific.value & "'"
-
-                        Dim sapinv As String
-                        sapinv = objColumnsPayment.Item("1").Cells.Item(i).Specific.value
-
-                        strsql = "SELECT U_TAXTaxNum FROM [@MIS_T3L] T0 WHERE U_OINVDocNum = '" & _
-                            CStr(objColumnsPayment.Item("1").Cells.Item(i).Specific.value) & "' "
-
-                        'strsql = "SELECT U_TAXTaxNum FROM [@MIS_T3L] T0 " '& _
-                        'sapinv & " "
-
-                        oRecSetFP.DoQuery(strsql)
-
-                        If oRecSetFP.RecordCount > 0 Then
-                            objColumnsPayment.Item("U_FPNoSeri").Cells.Item(i).Specific.value = _
-                            "112"
-
-                            '    objColumnsPayment.Item("10000127").Cells.Item(i).Specific.Checked = True
-
-                            '    Dim selisih As Double
-                            '    'selisih = CDbl(objColumnsPayment.Item("7").Cells.Item(I).Specific.value) - CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
-
-                            '    'Dim sValue As String = Regex.Replace(sInput, "[^0-9\" + sDecSep + "]", "")
-                            '    Dim sBalanceDue As String = System.Text.RegularExpressions.Regex.Replace(objColumnsPayment.Item("7").Cells.Item(i).Specific.value, _
-                            '                                         "[^0-9\" + oRecSet.Fields.Item("DecSep").Value + "]", "")
-
-                            '    selisih = CDbl(IIf(sBalanceDue = "", 0, sBalanceDue)) - CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
-
-                            '    'If objColumnsPayment.Item("7").Cells.Item(I).Specific.value = _
-                            '    'oRecSet.Fields.Item("U_CollectAmount").Value Then
-                            '    If CDbl(sBalanceDue) = CDbl(oRecSet.Fields.Item("U_CollectAmount").Value) Then
-                            '        objColumnsPayment.Item("24").Cells.Item(i).Specific.value = _
-                            '          CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
-                            '        'ElseIf Math.Abs(selisih) < 5000 Then
-                            '    ElseIf Math.Abs(selisih) < oRecSet.Fields.Item("MaxInDiff").Value Then
-                            '        objColumnsPayment.Item("24").Cells.Item(i).Specific.value = sBalanceDue
-                            '        'objColumnsPayment.Item("24").Cells.Item(i).Specific.value = oRecSet.Fields.Item("U_CollectAmount").Value
-                            '    End If
-
-                            'Else
-                            '    objColumnsPayment.Item("10000127").Cells.Item(i).Specific.Checked = False
-                            '    objColumnsPayment.Item("24").Cells.Item(i).Specific.value = objColumnsPayment.Item("7").Cells.Item(i).Specific.value
-                        Else
-                            objColumnsPayment.Item("U_FPNoSeri").Cells.Item(i).Specific.value = _
-                            "111"
-
-                        End If
-
-
-                    Next
+            If pVal.EventType = SAPbouiCOM.BoEventTypes.et_FORM_LOAD _
+                    Or pVal.EventType = SAPbouiCOM.BoEventTypes.et_FORM_DATA_LOAD _
+                    Or pVal.EventType = SAPbouiCOM.BoEventTypes.et_FORM_DEACTIVATE _
+                    Or pVal.EventType = SAPbouiCOM.BoEventTypes.et_FORM_UNLOAD _
+                    Or pVal.EventType = SAPbouiCOM.BoEventTypes.et_FORM_CLOSE Then
+                '
+                If pVal.EventType = SAPbouiCOM.BoEventTypes.et_FORM_UNLOAD Then
+                    'Dim oForm As SAPbouiCOM.Form = SBO_Application.Forms.Item(FormUID)
+                    'oForm.Close()
+                    'BubbleEvent = False
+                    isFormIncomingPayment_Closed = True
+                Else
+                    isFormIncomingPayment_Closed = False
                 End If
 
-                endTime = Now().ToString("HH:mm:ss")
-                SBO_Application.MessageBox("start Time: " & strTime & " end: " & endTime)
+                'SBO_Application.MessageBox("form event: " & pVal.EventType & ": " & pVal.EventType.ToString)
+            End If
 
-                oForm.Freeze(False)
+            'And pVal.ItemChanged = False _
+            'And pVal.InnerEvent = True _
+            'And pVal.EventType <> SAPbouiCOM.BoEventTypes.et_FORM_DATA_LOAD _
+            'And isFormClosed = False Then
 
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(oRecSetFP)
-                oRecSetFP = Nothing
+            If pVal.ItemUID = "5" And pVal.EventType = SAPbouiCOM.BoEventTypes.et_LOST_FOCUS Then
 
-                'System.Runtime.InteropServices.Marshal.ReleaseComObject(oForm)
+                If pVal.BeforeAction = False _
+                    And (pVal.EventType <> SAPbouiCOM.BoEventTypes.et_FORM_LOAD _
+                    And pVal.EventType <> SAPbouiCOM.BoEventTypes.et_FORM_CLOSE _
+                    And pVal.EventType <> SAPbouiCOM.BoEventTypes.et_FORM_DEACTIVATE _
+                    And pVal.EventType <> SAPbouiCOM.BoEventTypes.et_FORM_UNLOAD) _
+                    And isFormIncomingPayment_Closed = False _
+                    Then
 
-                oForm = Nothing
-                objColumnsPayment = Nothing
-                objMatrixPayment = Nothing
+                    Dim oForm As SAPbouiCOM.Form
+                    oForm = SBO_Application.Forms.Item(FormUID)
 
-                'If oForm.Items.Item("T3Number").Specific.value <> "" Then
-                '    LostFocusCollect(oForm)
-                'End If
+                    Dim strsql As String
+                    Dim oRecSetFP As SAPbobsCOM.Recordset = Nothing
+                    Dim objColumnsPayment As SAPbouiCOM.Columns = Nothing
+                    Dim objMatrixPayment As SAPbouiCOM.Matrix = Nothing
+
+                    oRecSetFP = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
+                    objMatrixPayment = oForm.Items.Item("20").Specific
+                    objColumnsPayment = objMatrixPayment.Columns
+
+                    'Dim duration As Integer
+                    Dim strTime As DateTime = Now().ToString("HH:mm:ss")
+                    Dim endTime As DateTime
+
+
+                    'oForm.Freeze(True)
+                    If BubbleEvent = True Then
+                        For i = 1 To objMatrixPayment.RowCount
+
+                            'strsql = "SELECT T0.U_OINVDocNum, ISNULL(T0.U_CollectAmount, 0) U_CollectAmount, T1.U_CardCode, " & _
+                            '    "T2.DocCur, T3.MaxInDiff, T4.DecSep " & _
+                            '    "FROM [@MIS_PDCL] T0 " & _
+                            '    "LEFT JOIN [@MIS_PDC] T1 ON T0.DocEntry = T1.DocEntry " & _
+                            '    "LEFT JOIN OINV T2 ON T2.DocEntry = T0.U_OINVDocEntry " & _
+                            '    "LEFT JOIN OCRN T3 ON T3.CurrCode = T2.DocCur " & _
+                            '    "LEFT JOIN OADM T4 ON 1=1 " & _
+                            '    "WHERE T1.U_CardCode='" & oFormMain.Items.Item("5").Specific.value & "' AND " & _
+                            '    "T1.U_PDCBankID='" & oFormUdf.Items.Item("U_PDCBankID").Specific.value & "' AND " & _
+                            '    "T1.U_PDCNo='" & oFormUdf.Items.Item("U_PDCNo").Specific.value & "' AND " & _
+                            '    "T0.U_OINVDocNum='" & objColumnsPayment.Item("1").Cells.Item(i).Specific.value & "'"
+
+                            Dim sapinv As String
+                            sapinv = objColumnsPayment.Item("1").Cells.Item(i).Specific.value
+
+                            strsql = "SELECT U_TAXTaxNum FROM [@MIS_T3L] T0 WHERE U_OINVDocNum = '" & _
+                                CStr(objColumnsPayment.Item("1").Cells.Item(i).Specific.value) & "' "
+
+                            'strsql = "SELECT U_TAXTaxNum FROM [@MIS_T3L] T0 " '& _
+                            'sapinv & " "
+
+                            oRecSetFP.DoQuery(strsql)
+
+                            If oRecSetFP.RecordCount > 0 Then
+                                objColumnsPayment.Item("U_FPNoSeri").Cells.Item(i).Specific.value = _
+                                oRecSetFP.Fields.Item("U_TAXTaxNum").Value
+                                '"112"
+
+                                '    objColumnsPayment.Item("10000127").Cells.Item(i).Specific.Checked = True
+
+                                '    Dim selisih As Double
+                                '    'selisih = CDbl(objColumnsPayment.Item("7").Cells.Item(I).Specific.value) - CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
+
+                                '    'Dim sValue As String = Regex.Replace(sInput, "[^0-9\" + sDecSep + "]", "")
+                                '    Dim sBalanceDue As String = System.Text.RegularExpressions.Regex.Replace(objColumnsPayment.Item("7").Cells.Item(i).Specific.value, _
+                                '                                         "[^0-9\" + oRecSet.Fields.Item("DecSep").Value + "]", "")
+
+                                '    selisih = CDbl(IIf(sBalanceDue = "", 0, sBalanceDue)) - CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
+
+                                '    'If objColumnsPayment.Item("7").Cells.Item(I).Specific.value = _
+                                '    'oRecSet.Fields.Item("U_CollectAmount").Value Then
+                                '    If CDbl(sBalanceDue) = CDbl(oRecSet.Fields.Item("U_CollectAmount").Value) Then
+                                '        objColumnsPayment.Item("24").Cells.Item(i).Specific.value = _
+                                '          CDbl(oRecSet.Fields.Item("U_CollectAmount").Value)
+                                '        'ElseIf Math.Abs(selisih) < 5000 Then
+                                '    ElseIf Math.Abs(selisih) < oRecSet.Fields.Item("MaxInDiff").Value Then
+                                '        objColumnsPayment.Item("24").Cells.Item(i).Specific.value = sBalanceDue
+                                '        'objColumnsPayment.Item("24").Cells.Item(i).Specific.value = oRecSet.Fields.Item("U_CollectAmount").Value
+                                '    End If
+
+                                'Else
+                                '    objColumnsPayment.Item("10000127").Cells.Item(i).Specific.Checked = False
+                                '    objColumnsPayment.Item("24").Cells.Item(i).Specific.value = objColumnsPayment.Item("7").Cells.Item(i).Specific.value
+                            Else
+                                'objColumnsPayment.Item("U_FPNoSeri").Cells.Item(i).Specific.value = _
+                                '""
+
+                            End If
+
+
+                        Next
+                    End If
+
+                    endTime = Now().ToString("HH:mm:ss")
+                    'SBO_Application.MessageBox("start Time: " & strTime & " end: " & endTime _
+                    '                           & " beforeAction: " & pVal.BeforeAction _
+                    '                           & " inner event: " & pVal.InnerEvent _
+                    '                           & " form event: " & pVal.EventType.ToString)
+
+                    'oForm.Freeze(False)
+
+                    System.Runtime.InteropServices.Marshal.ReleaseComObject(oRecSetFP)
+                    oRecSetFP = Nothing
+
+                    'System.Runtime.InteropServices.Marshal.ReleaseComObject(oForm)
+
+                    oForm = Nothing
+                    objColumnsPayment = Nothing
+                    objMatrixPayment = Nothing
+                    'BubbleEvent = False
+
+                    'If oForm.Items.Item("T3Number").Specific.value <> "" Then
+                    '    LostFocusCollect(oForm)
+                    'End If
+                End If
+
             End If
 
         End If
